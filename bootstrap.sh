@@ -59,6 +59,6 @@ echo "  ✓ .git/info/exclude (6 patterns)"
 
 echo ""
 echo "Done. Next steps:"
-echo "  1. Edit $TARGET/handovers/_relay_template.json — set 'workdir' and adjust constraints"
+echo "  1. Edit $TARGET/handovers/_relay_context_template.md — set project name and paths"
 echo "  2. Create initial master plan in $TARGET/.internal_master_plan.md"
 echo "  3. Start building."
