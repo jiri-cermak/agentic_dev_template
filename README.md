@@ -1,53 +1,68 @@
-# Tiered Relay Architecture — Bootstrap Seed
+# Tiered Relay Architecture v6 — Bootstrap Template
 
-Self-contained project scaffolding for the agentic loop development system. Drop these files into any new project to start working with the Architect → Subagent → Verify workflow.
+A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `AGENTS.md` | Protocol — the Master Architect's instruction set. Read first. |
-| `_relay_context_template.md` | Context template — accumulated environment learnings. Copy → fill in → paste into `delegate_task`. |
-| `bootstrap.sh` | One-command init for a new project directory. |
+| `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules |
+| `AGENTS.md` | Project adapter: local root, stack, tools, tests, and protected files |
+| `_relay_context_template.md` | Direct `delegate_task` context template |
+| `bootstrap.sh` | Creates the scaffold in a new project |
+| `review_by_sol_2026-08-09.md` | Design review and rationale for v6 |
 
-## Quick Start
+## Quick start
 
 ```bash
-./bootstrap.sh /opt/data/projects/my-new-project
+./bootstrap.sh /absolute/path/to/new-project
 ```
 
-This creates the full workspace: git repo, handover directories, state files, exclude patterns, protocol, and template.
+Then replace all adapter placeholders in `AGENTS.md` and `handovers/_relay_context_template.md`, write `.internal_master_plan.md`, and start:
 
-## What Gets Bootstrapped
-
+```text
+plan → pre-flight → relay → delegate → verify → gate → post-mortem
 ```
-my-new-project/
-├── AGENTS.md                          ← protocol rules
-├── .internal_master_plan.md           ← Architect-only plan (empty)
-├── devlog.md                          ← subagent activity log (empty)
+
+## Generated workspace
+
+```text
+new-project/
+├── AGENTS.md
+├── CORE_PROTOCOL.md
+├── .internal_master_plan.md
+├── devlog.md
 ├── handovers/
-│   ├── _relay_context_template.md        ← copy+paste into delegate_task
-│   ├── done/                              ← subagent completion reports
-│   └── archive/                           ← completed step archives
-└── learnings/                         ← per-step observation files
+│   ├── _relay_context_template.md
+│   ├── done/
+│   └── archive/
+└── learnings/
 ```
 
-All state files are gitignored via `.git/info/exclude`.
+Internal state is excluded via `.git/info/exclude`. The bootstrap script never stages or commits project files.
 
-## After Bootstrap
+## v6 design
 
-1. Edit `handovers/_relay_context_template.md` — update project name, absolute paths, `study` references, and `do_not_touch` list for your stack.
-2. Write your first master plan in `.internal_master_plan.md`.
-3. Start the loop: plan → build context from template → delegate → verify.
+v6 separates stable orchestration from local assumptions:
 
-## Origin
+- **Core:** lifecycle, evidence gates, retry rules, git safety, handover contract, and learning promotion.
+- **Adapter:** project paths, tools, dependencies, test commands, protected files, and domain conventions.
+- **Run evidence:** handovers, devlog, and classified learnings.
 
-Extracted from the Plausit project after 3 relay iterations. Core learnings baked in:
-- Docker daemon unavailable in subagent environment
-- Python stdlib replaces missing shell tools (xxd, od, unzip, file) — §D mandate
-- Direct `delegate_task` context replaces JSON relay files (Phase 2 v5)
-- `execute_code` approval gate avoided by embedding instructions directly
-- CSS grep assertions need regex patterns to handle whitespace variance
-- Self-verification loops catch real bugs (confirmed 2 catches in STEP-03)
-- Git identity must be configured before first commit
-- Font downloads: gwfh.mranftl.com API, `?download=zip` endpoint, Python zipfile extraction
+v4 used JSON relay payloads. v5 introduced direct Markdown context. v6 keeps direct context and makes the template genuinely project-agnostic.
+
+## Learning policy
+
+Classify every observation as `core`, `adapter`, `project-specific`, or `historical`. Promote only repeatable project-agnostic rules into `CORE_PROTOCOL.md`.
+
+## Safety
+
+The template uses placeholders intentionally. Do not copy environment-specific assumptions from another project without verifying them. Relay agents must stage explicit target files only and independently reproduce the declared tests.
+
+## Rationale
+
+See `review_by_sol_2026-08-09.md` for the full findings-to-change mapping and the changes deliberately not promoted into core.
+
+## License
+
+Add the license appropriate for your use of this template.

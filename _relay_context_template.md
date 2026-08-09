@@ -1,82 +1,93 @@
-# Relay Context Template — trebon-sites
+# Relay Context Template — v6
 
-Copy this block into `delegate_task` `context`. Fill in `REPLACE_ME` fields.
-Update as new patterns emerge in `learnings/*.md`.
+Copy this context into `delegate_task`. Replace every `{...}` placeholder before delegation.
 
-```
-**Project:** trebon-sites at /opt/data/projects/trebon-sites
-**Task ID:** STEP-NN
-**Profile:** thinking_type: disabled, reasoning_effort: null
+```markdown
+**Project:** {PROJECT_NAME}
+**Project root:** {PROJECT_ROOT}
+**Task ID:** {TASK_ID}
+**Execution profile:** thinking_type: {disabled|enabled}; reasoning_effort: {null|high}
+
+## Location pre-flight
+The first command must be:
+`cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel`
+Do not rely on workdir metadata. Use absolute paths for all target files.
 
 ## Task
-REPLACE_ME — Self-contained. No project shorthand, no "as discussed."
+{SELF_CONTAINED_TASK_DESCRIPTION}
 
-## Target Files
-- `/opt/data/projects/trebon-sites/REPLACE_ME` — create | modify
+## Target files
+- `{ABSOLUTE_TARGET_PATH}` — create | modify
+
+## Out of scope
+- `{ABSOLUTE_OR_RELATIVE_PATH_NOT_TO_TOUCH}`
 
 ## Constraints
 **Study:**
-- /opt/data/projects/trebon-sites/REPLACE_ME — reference files for conventions
-- /opt/data/projects/redesign/NEW_V5_design_specification.md — canonical design source
+- `{REFERENCE_FILE}`
 
-**Do NOT touch:**
-- AGENTS.md, .internal_master_plan.md, devlog.md
-- handovers/, learnings/, .git/
-- nginx.conf, shared.conf, Dockerfile, scripts/
+**Adapter boundaries:**
+- Allowed tools: {ALLOWED_TOOLS}
+- Unavailable tools: {UNAVAILABLE_TOOLS}
+- Dependency policy: {DEPENDENCY_POLICY}
+- Build/deploy policy: {BUILD_DEPLOY_POLICY}
 
-**Boundaries:**
-- NO npm packages
-- NO build steps (Tailwind/PostCSS/webpack)
-- NO frameworks (React/Vue/Svelte)
-- NO pip install (unavailable in container)
-- NO apt-get/apt install (no sudo)
-- CSS/HTML/JS only — no backend code
+## Testing methodology
+Run these commands verbatim and preserve complete output:
 
-## Testing Methodology
-REPLACE_ME — Verbatim shell commands. Must include ≥1 negative test + ≥1 structural assertion.
+1. Structural assertion:
+   `{STRUCTURAL_TEST_COMMAND}`
+2. Negative assertion:
+   `{NEGATIVE_TEST_COMMAND}`
+3. Runtime assertion, if applicable:
+   `{RUNTIME_TEST_COMMAND_OR_NOT_APPLICABLE}`
+4. Browser/DOM assertion, if UI or client-side behavior changes:
+   `{BROWSER_TEST_COMMAND_OR_NOT_APPLICABLE}`
 
-Rules:
-- ALL hex/file/archive operations use Python stdlib, not xxd/od/unzip/file — see §D
-- Docker is UNAVAILABLE — use python3 -m http.server for web validation
-- Background server pattern:
-  python3 -m http.server PORT --bind 127.0.0.1  (use terminal background=true)
-  curl -sS http://localhost:PORT/path
-  kill $(lsof -t -i:PORT) 2>/dev/null || pkill -f 'http.server PORT'
-- CSS grep: use regex like 'prop.*value' not 'prop:value' — whitespace varies
-- grep -c exit code 1 on zero matches → append || true for negative tests
-- Verification scripts go under /opt/data/, not /tmp/
+Use the project's adapter rules. Do not substitute tools or weaken assertions without recording the change as a surprise.
 
-## Stop Conditions
-- ⚠️ STOP: If Docker commands fail, do NOT attempt to install or start Docker. Use python3 -m http.server instead.
-- ⚠️ STOP: If pip/apt-get/apt fail, do NOT attempt alternative package managers. Work with what's installed.
-- ⚠️ STOP: If git commit fails with 'Author identity unknown', run: git config user.email 'architect@trebon-sites' && git config user.name 'Master Architect'. ONE attempt only.
-- ⚠️ STOP: Avoid raw IPs/URLs in git commit messages — use descriptive text instead.
-- ⚠️ STOP: Do NOT use Fontsource CDN / npm-based font packages — blocked by security scanner. Use gwfh API instead.
-- ⚠️ GWLINK — Google WebFonts Helper API for font downloads:
-  curl -sL -o fonts.zip "https://gwfh.mranftl.com/api/fonts/FAMILY?download=zip&subsets=latin,latin-ext&variants=WEIGHTS&formats=woff2"
-  Then extract with: python3 -c "import zipfile; zipfile.ZipFile('fonts.zip').extractall('fonts/')"
+## Stop conditions
+- STOP if the repository root or target boundary is ambiguous.
+- STOP if a required environment capability is missing and the adapter does not authorize remediation.
+- STOP on a repeated error signature; do not consume further retries.
+- STOP if a test failure indicates a missing or contradictory specification rather than attempting unrelated fixes.
 
 ## Handover
-Write to: `handovers/done/completion-STEP-NN.md`
+Write to `{PROJECT_ROOT}/handovers/done/completion-{TASK_ID}.md` using exactly these headings:
 
-Required sections (Contract §A):
-1. Raw Test Output — complete terminal dump, never summarized
-2. Git Evidence — git log --oneline -1 + git diff HEAD~1 --stat
-3. Files Table — | File Path | Action | Lines Added | Lines Deleted |
-4. Surprises Checklist:
-   - Did every command succeed on first attempt?
-   - Did you read anything outside this relay context?
-   - Did any test need adjustment beyond what was specified?
-   - Did you modify any file NOT in target_files?
-   - Did you add any dependency not in constraints?
-5. Contract Enforcement — negative case + shape assertions confirmed
+## Raw Test Output
+Complete, unabridged output for every declared test.
+
+## Git Evidence
+Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, and `git status --short`.
+
+## Files Changed
+| File Path | Action | Lines Added | Lines Deleted |
+|---|---|---:|---:|
+
+## Surprises Checklist
+- [ ] Every command succeeded on first attempt.
+- [ ] Nothing outside this context was read.
+- [ ] No test needed adjustment.
+- [ ] No file outside target files was modified.
+- [ ] No undeclared dependency was added.
+
+Describe any checked surprise below the checklist.
+
+## Contract Enforcement
+State where the structural and negative assertions appear in the raw output. Include runtime/browser evidence when applicable.
 
 ## Commit
-Use the EOF pattern — avoids shell escaping issues:
-```
+Before committing, run:
+`git diff --cached --name-only`
+Stage only the explicit target files. Never use `git add -A` or `git add .`.
+Commit with:
+
+```bash
 git commit -F - << 'EOF'
-STEP-NN: short description of what was done
+{TASK_ID}: short description
 EOF
 ```
-Commit messages: no raw IPs, use descriptive text. After commit, keep working tree clean.
 ```
+
+The Architect independently reruns the declared tests before accepting the step.
