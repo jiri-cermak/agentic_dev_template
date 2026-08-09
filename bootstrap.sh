@@ -35,8 +35,8 @@ echo "  ✓ AGENTS.md"
 
 # ── Relay template ──
 mkdir -p "$TARGET/handovers/done" "$TARGET/handovers/archive"
-cp "$BOOTSTRAP_DIR/_relay_template.json" "$TARGET/handovers/_relay_template.json"
-echo "  ✓ handovers/_relay_template.json"
+cp "$BOOTSTRAP_DIR/_relay_context_template.md" "$TARGET/handovers/_relay_context_template.md"
+echo "  ✓ handovers/_relay_context_template.md"
 
 # ── Learnings dir ──
 mkdir -p "$TARGET/learnings"
