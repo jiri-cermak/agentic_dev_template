@@ -6,6 +6,7 @@ A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 
 | File | Purpose |
 |---|---|
+| `SOUL.md` | Model-neutral Architect identity and invariant principles |
 | `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules |
 | `AGENTS.md` | Project adapter: local root, stack, tools, tests, and protected files |
 | `_relay_context_template.md` | Direct `delegate_task` context template |
@@ -28,6 +29,7 @@ plan → pre-flight → relay → delegate → verify → gate → post-mortem
 
 ```text
 new-project/
+├── SOUL.md
 ├── AGENTS.md
 ├── CORE_PROTOCOL.md
 ├── .internal_master_plan.md

@@ -30,8 +30,10 @@ fi
 
 cp "$BOOTSTRAP_DIR/CORE_PROTOCOL.md" "$TARGET/CORE_PROTOCOL.md"
 cp "$BOOTSTRAP_DIR/AGENTS.md" "$TARGET/AGENTS.md"
+cp "$BOOTSTRAP_DIR/SOUL.md" "$TARGET/SOUL.md"
 echo "  ✓ CORE_PROTOCOL.md"
 echo "  ✓ AGENTS.md"
+echo "  ✓ SOUL.md"
 
 mkdir -p "$TARGET/handovers/done" "$TARGET/handovers/archive"
 cp "$BOOTSTRAP_DIR/_relay_context_template.md" "$TARGET/handovers/_relay_context_template.md"
