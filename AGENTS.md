@@ -23,6 +23,8 @@ git status --short
 
 Confirm that the repository exists, the adapter's required environment is available, internal state is excluded, and the target files are present or intentionally created by the relay. If a required environment is missing, stop and report it; do not install packages unless the adapter explicitly permits it.
 
+**Skill isolation:** Every `delegate_task` call MUST set `workdir` to a directory outside the project root (e.g., `workdir="/opt/data"`). Some runtimes auto-detect project context files from the working directory and inject them as virtual skills. Running subagents outside the project root prevents this — the relay context is the subagent's sole source of rules.
+
 ## Local protected files
 
 Do not modify unless a relay explicitly names them:
