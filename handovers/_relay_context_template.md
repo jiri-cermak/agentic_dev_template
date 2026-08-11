@@ -2,7 +2,7 @@
 
 Copy this template into `delegate_task`. Replace every `{...}` placeholder before delegation. Read `CORE_PROTOCOL.md` first — it defines the lifecycle and gates.
 
-**Workdir:** Always set `workdir` to a directory outside the project root (e.g., `workdir="/opt/data"`). This prevents the runtime from auto-detecting `AGENTS.md` in the project root and injecting it as a virtual skill. The relay context is the subagent's sole source of rules — every absolute path, constraint, and test is already self-contained here.
+**Skill isolation:** Rename `AGENTS.md` to `.agents.md` (dotfile) in every project. The runtime scans only `.hermes.md`, `AGENTS.md`, `CLAUDE.md`, and `.cursorrules` for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the runtime from injecting it as a virtual skill. The relay context is the subagent's sole source of rules.
 
 ```markdown
 **Project:** {PROJECT_NAME}

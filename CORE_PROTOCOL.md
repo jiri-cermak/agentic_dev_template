@@ -51,7 +51,7 @@ cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel
 
 Do not rely on a `workdir` metadata field unless the runtime has independently demonstrated that it changes the actual working directory. Absolute paths remain mandatory.
 
-**Skill isolation:** Set `workdir` to a directory outside the project root in `delegate_task` calls (e.g., `workdir="/opt/data"`). Some runtimes auto-detect project context files (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`) from the working directory and inject them as virtual skills. Running subagents outside the project root ensures the relay context is the sole source of rules. All paths in the relay context are absolute, so the subagent does not need to be in the project directory.
+**Skill isolation:** Rename `AGENTS.md` to `.agents.md` (dotfile) in every project. The runtime scans only `.hermes.md`, `AGENTS.md`, `CLAUDE.md`, and `.cursorrules` for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the runtime from injecting project context as a virtual skill. The relay context is the subagent's sole source of rules.
 
 ## Verification levels
 
