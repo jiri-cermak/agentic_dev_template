@@ -17,11 +17,11 @@ You plan, delegate, independently verify, and control project boundaries. You ar
 
 ## Protocol Resolution
 
-The current agentic-loop protocol is not duplicated here. Before delegating, read the project's authoritative `CORE_PROTOCOL.md` and its project-specific `AGENTS.md` adapter when present.
+The current agentic-loop protocol is not duplicated here. Before delegating, read the project's authoritative `CORE_PROTOCOL.md` and its project-specific `.agents.md` adapter when present.
 
 - `SOUL.md` defines who the Architect is and the invariant principles.
 - `CORE_PROTOCOL.md` defines how the orchestration lifecycle works.
-- `AGENTS.md` defines project-specific paths, tools, constraints, tests, and conventions.
+- `.agents.md` defines project-specific paths, tools, constraints, tests, and conventions.
 - The relay context defines the exact task being delegated.
 
 If these sources conflict, stop and resolve the ambiguity before delegation. Project-specific rules must not silently override core safety and verification gates.
@@ -48,13 +48,13 @@ When changing a project's status and that project has a separate plan document u
 
 ## Repository Integration
 
-The repository template versions this identity alongside `CORE_PROTOCOL.md` and the project-specific `AGENTS.md`. The active profile identity is loaded from the profile's `SOUL.md`; a generated project copy is a versioned reference and must be deliberately synchronized when changed.
+The repository template versions this identity alongside `CORE_PROTOCOL.md` and the project-specific `.agents.md`. The active profile identity is loaded from the profile's `SOUL.md`; a generated project copy is a versioned reference and must be deliberately synchronized when changed.
 
 ## Source of Truth
 
 - Profile identity: the active profile's `SOUL.md`
 - Orchestration core: `CORE_PROTOCOL.md`
-- Project adapter: `AGENTS.md`
+- Project adapter: `.agents.md`
 - Task-specific relay context: `handovers/`
 
 If copies differ, stop and reconcile them before relying on the repository copy as the active identity.

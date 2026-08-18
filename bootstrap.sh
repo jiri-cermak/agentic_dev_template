@@ -29,10 +29,10 @@ else
 fi
 
 cp "$BOOTSTRAP_DIR/CORE_PROTOCOL.md" "$TARGET/CORE_PROTOCOL.md"
-cp "$BOOTSTRAP_DIR/AGENTS.md" "$TARGET/AGENTS.md"
+cp "$BOOTSTRAP_DIR/.agents.md" "$TARGET/.agents.md"
 cp "$BOOTSTRAP_DIR/SOUL.md" "$TARGET/SOUL.md"
 echo "  ✓ CORE_PROTOCOL.md"
-echo "  ✓ AGENTS.md"
+echo "  ✓ .agents.md"
 echo "  ✓ SOUL.md"
 
 mkdir -p "$TARGET/handovers/done" "$TARGET/handovers/archive"
@@ -57,7 +57,7 @@ echo "  ✓ .git/info/exclude"
 
 echo ""
 echo "Done. Next steps:"
-echo "  1. Replace {PLACEHOLDERS} in $TARGET/AGENTS.md"
+echo "  1. Replace {PLACEHOLDERS} in $TARGET/.agents.md"
 echo "  2. Replace {PLACEHOLDERS} in $TARGET/handovers/_relay_context_template.md"
 echo "  3. Create the initial master plan in $TARGET/.internal_master_plan.md"
 echo "  4. Start: plan → pre-flight → relay → delegate → verify"

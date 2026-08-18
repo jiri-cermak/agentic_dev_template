@@ -8,7 +8,7 @@ A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 |---|---|
 | `SOUL.md` | Model-neutral Architect identity and invariant principles |
 | `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules |
-| `AGENTS.md` | Project adapter: local root, stack, tools, tests, and protected files |
+| `.agents.md` | Project adapter: local root, stack, tools, tests, and protected files |
 | `_relay_context_template.md` | Direct `delegate_task` context template |
 | `bootstrap.sh` | Creates the scaffold in a new project |
 | `review_by_sol_2026-08-09.md` | Design review and rationale for v6 |
@@ -19,7 +19,7 @@ A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 ./bootstrap.sh /absolute/path/to/new-project
 ```
 
-Then replace all adapter placeholders in `AGENTS.md` and `handovers/_relay_context_template.md`, write `.internal_master_plan.md`, and start:
+Then replace all adapter placeholders in `.agents.md` and `handovers/_relay_context_template.md`, write `.internal_master_plan.md`, and start:
 
 ```text
 plan → pre-flight → relay → delegate → verify → gate → post-mortem
@@ -30,7 +30,7 @@ plan → pre-flight → relay → delegate → verify → gate → post-mortem
 ```text
 new-project/
 ├── SOUL.md
-├── AGENTS.md
+├── .agents.md
 ├── CORE_PROTOCOL.md
 ├── .internal_master_plan.md
 ├── devlog.md

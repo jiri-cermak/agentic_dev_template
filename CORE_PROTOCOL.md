@@ -1,6 +1,6 @@
 # Tiered Relay Architecture v6 — Core Protocol
 
-This document defines the project-agnostic orchestration loop. It does not define a project's stack, tools, domain, or deployment environment. Those belong in the project adapter (`AGENTS.md` and the relay context template).
+This document defines the project-agnostic orchestration loop. It does not define a project's stack, tools, domain, or deployment environment. Those belong in the project adapter (`.agents.md` and the relay context template).
 
 ## Roles
 

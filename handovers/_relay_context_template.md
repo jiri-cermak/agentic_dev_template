@@ -23,7 +23,7 @@ Do not rely on workdir metadata. Use absolute paths for all target files.
 - `{ABSOLUTE_PATH}` — create | modify
 
 ## Out of scope
-- `AGENTS.md`, `CORE_PROTOCOL.md`, `.internal_master_plan.md`, `devlog.md`
+- `.agents.md`, `CORE_PROTOCOL.md`, `.internal_master_plan.md`, `devlog.md`
 - `handovers/`, `learnings/`, `.git/`
 - {PROJECT_SPECIFIC_PROTECTED_FILES}
 - Any file not listed above
