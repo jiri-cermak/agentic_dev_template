@@ -1,4 +1,4 @@
-# Tiered Relay Architecture v6 — Bootstrap Template
+# Tiered Relay Architecture v6.1 — Bootstrap Template
 
 A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 
@@ -6,23 +6,28 @@ A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 
 | File | Purpose |
 |---|---|
-| `SOUL.md` | Model-neutral Architect identity and invariant principles |
-| `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules |
+| `SOUL.md` | Model-neutral Architect identity, boundaries, and invariant principles |
+| `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules (v6.1) |
 | `.agents.md` | Project adapter: local root, stack, tools, tests, and protected files |
-| `_relay_context_template.md` | Direct `delegate_task` context template |
+| `_relay_context_template.md` | Subagent delegation context template (v6.1) |
 | `bootstrap.sh` | Creates the scaffold in a new project |
 | `review_by_sol_2026-08-09.md` | Design review and rationale for v6 |
+| `adapters/` | Optional harness-specific shims (e.g., DSH, future harnesses) |
 
 ## Quick start
 
 ```bash
+# Basic (agnostic)
 ./bootstrap.sh /absolute/path/to/new-project
+
+# With harness adapter
+./bootstrap.sh /absolute/path/to/new-project --adapter dsh
 ```
 
 Then replace all adapter placeholders in `.agents.md` and `handovers/_relay_context_template.md`, write `.internal_master_plan.md`, and start:
 
 ```text
-plan → pre-flight → relay → delegate → verify → gate → post-mortem
+plan → stash → pre-flight → relay → delegate → verify → gate → post-mortem
 ```
 
 ## Generated workspace
@@ -43,15 +48,53 @@ new-project/
 
 Internal state is excluded via `.git/info/exclude`. The bootstrap script never stages or commits project files.
 
-## v6 design
+## v6.1 design
 
-v6 separates stable orchestration from local assumptions:
+v6.1 operationalizes the orchestration core with battle-tested procedures:
 
-- **Core:** lifecycle, evidence gates, retry rules, git safety, handover contract, and learning promotion.
-- **Adapter:** project paths, tools, dependencies, test commands, protected files, and domain conventions.
-- **Run evidence:** handovers, devlog, and classified learnings.
+- **3-tier system:** Minimal/Standard/Full with decision tree and empirical failure rates
+- **Pre-delegation stash:** Commit/stash state files before delegation (prevents pollution)
+- **Error handling:** Explicit path for delegation tool failures
+- **Clean-state checks:** Verify working tree clean between steps
+- **Master plan template:** Standardized format with tier, effort, dependencies
+- **Iteration pattern:** Probe → Discover → Refine → Implement for loose requirements
+- **ROI rankings:** Add anti-hallucination measures only when failures occur
+- **Files verification:** Independent `wc -c` and `head -1` checks on all files
+- **State-aware re-execution:** Confirm agent's commit is latest before re-running tests
+- **Shape contracts:** Exact data shapes/API signatures (Standard/Full tiers)
 
-v4 used JSON relay payloads. v5 introduced direct Markdown context. v6 keeps direct context and makes the template genuinely project-agnostic.
+v4 used JSON relay payloads. v5 introduced direct Markdown context. v6 made the template genuinely project-agnostic. v6.1 adds operational procedures from the prompt evolution session.
+
+## Requirement tiers
+
+| Tier | Clarity | Expected iterations | Failure rate |
+|---|---|---|---|
+| **Minimal** | Loose (unsure what to build) | 2-3 | ~15% |
+| **Standard** | Medium (know what, details may shift) | 1-2 | ~5% |
+| **Full** | Tight (spec stable, multi-relay) | 0-1 | ~2% |
+
+Decision: Loose → Minimal. Medium → Standard. Tight + ≥3 relays → Full. Tight + <3 relays → Standard.
+
+## Harness adapters
+
+`adapters/` contains OPTIONAL harness-specific shims — e.g., `adapters/dsh/` for DeepSeek Harness. The template core is harness-agnostic and never references them. Install one per project with `./bootstrap.sh <path> --adapter <name>`. Deleting `adapters/` changes nothing.
+
+Available adapters:
+- `dsh/` — DeepSeek Harness adapter (see `adapters/dsh/README.md`)
+
+## Anti-hallucination measures
+
+The protocol includes explicit measures to catch common failure modes:
+
+- **Raw output paste:** Agent must paste complete terminal output, never summaries
+- **Surprises checklist:** Agent must disclose every deviation
+- **Shape contracts:** Exact data shapes, not pseudocode
+- **Negative tests:** Assert something should NOT happen
+- **Files verification:** Architect independently checks file size and first line
+- **State-aware re-execution:** Confirm agent's commit before re-running tests
+- **Pre-delegation stash:** Prevent state-file pollution
+
+Add measures only when you hit the corresponding failure. See CORE_PROTOCOL.md §Failure → Measure ROI.
 
 ## Learning policy
 
