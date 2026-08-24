@@ -12,6 +12,7 @@ Copy this template into the relay dispatch. Replace every `{...}` placeholder be
 **max_attempts:** {3}
 **escalation_policy:** {human_retry | skip_on_fail | block_and_continue}
 **progress_interval:** {5}
+**max_depth:** {1}
 **Execution profile:** thinking_type: {disabled|enabled}; reasoning_effort: {null|low|medium|high}
 **Model/provider:** record actual delegated model/provider
 
@@ -22,6 +23,8 @@ Do not rely on workdir metadata. Use absolute paths for all target files.
 
 ## Task
 {SELF_CONTAINED_TASK_DESCRIPTION}
+
+At `max_depth` > 1, the subagent may spawn children with a reduced-scope relay context (each inherits the parent's `success_criteria` and adds its own).
 
 ## Target files
 - `{ABSOLUTE_PATH}` — create | modify

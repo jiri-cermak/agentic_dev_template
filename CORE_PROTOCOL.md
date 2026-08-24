@@ -174,6 +174,10 @@ Long relays report progress. The subagent writes `handovers/{TASK_ID}/progress.m
 
 The Architect may read `progress.md` at any time. To abort, the Architect writes `handovers/{TASK_ID}/abort.md` with the reason. The subagent checks for `abort.md` between steps and, on finding it, stops cleanly and writes a partial handover (what was done, what remains).
 
+## Hierarchical delegation
+
+A relay may declare `max_depth:` (default 1, nominal maximum 3). At `max_depth` ≥ 2, a subagent may spawn its own children with a reduced-scope relay context: each child inherits the parent's `success_criteria` and adds its own, and every depth level writes its own handover file. The Architect still verifies the top-level result. The core declares the field and the nominal maximum; the adapter enforces the actual ceiling it supports.
+
 ## Learning lifecycle
 
 Subagents log every observation to `learnings/pending.md` (a single append-only file, not per-item files). Each entry carries one classification:
