@@ -40,6 +40,19 @@ Do not rely on workdir metadata. Use absolute paths for all target files.
 - {ADDITIONAL_CONSTRAINTS}
 - No `git add -A` or `git add .`
 
+## Capability needs
+Declare only the capabilities this relay depends on; the adapter maps each to `available | degraded | not_available`. The Architect must check the adapter README for available capabilities before declaring a need.
+
+capability_needs:
+  - capability: live_steering
+    fallback: kill_and_respawn
+  - capability: cross_session_memory
+    fallback: file_based_learnings
+  - capability: gateway_notification
+    fallback: devlog_only
+  - capability: compression_safety
+    fallback: manual_context_checkpoints
+
 ## Testing methodology
 Run these commands verbatim and preserve complete output:
 

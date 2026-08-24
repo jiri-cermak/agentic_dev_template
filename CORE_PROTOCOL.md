@@ -151,6 +151,19 @@ The Architect reviews the postmortem and chooses one:
 
 The relay's `escalation_policy` preselects the default: `human_retry` escalates for the retry decision, `skip_on_fail` skips and moves on, `block_and_continue` marks blocked and continues. Lite relays default to `skip_on_fail`; full relays default to `human_retry`.
 
+## Capability negotiation
+
+A relay may depend on runtime capabilities that not every harness provides — live steering, cross-session memory, gateway notification, compression safety. The relay declares its needs in `capability_needs:`; the adapter maps each to `available`, `degraded`, or `not_available`. The core names generic capabilities only, never a harness; the adapter resolves them.
+
+Each capability declares a `fallback` — the behavior used when it is `not_available`:
+
+- `live_steering` — steer a running subagent mid-flight; fallback: kill and respawn;
+- `cross_session_memory` — persist context across sessions; fallback: file-based learnings;
+- `gateway_notification` — notify a human out-of-band; fallback: `devlog.md` only;
+- `compression_safety` — preserve first and last turns under compression; fallback: manual context checkpoints.
+
+The adapter must document which capabilities it provides and how each maps. A capability the adapter does not provide degrades to its fallback, never to silence.
+
 ## Learning lifecycle
 
 Every observation receives one classification:
