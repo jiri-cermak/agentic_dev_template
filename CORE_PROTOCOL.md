@@ -42,7 +42,7 @@ START: New task
   └─→ Tight + <3 relays?  → Standard tier.
 ```
 
-**Iteration pattern for loose requirements:** Probe → Discover → Refine → Implement. Start with a minimal relay to probe; the first completion reveals gaps; tighten the next relay based on discoveries. Do not write a perfect spec upfront for something you do not fully understand.
+**Iteration pattern for loose requirements:** Probe → Discover → Refine → Implement. Start with a minimal relay to probe; the first completion reveals gaps; tighten the next relay based on discoveries. Do not write a perfect spec upfront for something you do not fully understand. Iteration is triggered by a genuine trade-off or conflicting constraint, not by looseness alone — a loose-but-harmless spec (pick a palette, pick a structure) has an obvious default and is correctly one-shot.
 
 Keep each relay below 30 minutes of expected execution. Split larger work. Never unlock a dependent step before the verification gate passes.
 
