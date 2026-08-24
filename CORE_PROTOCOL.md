@@ -166,14 +166,16 @@ The adapter must document which capabilities it provides and how each maps. A ca
 
 ## Learning lifecycle
 
-Every observation receives one classification:
+Subagents log every observation to `learnings/pending.md` (a single append-only file, not per-item files). Each entry carries one classification:
 
 - **core:** project-agnostic orchestration or evidence rule;
 - **adapter:** toolchain, environment, provider, or test-runner rule;
 - **project-specific:** domain, design, asset, or product rule;
 - **historical:** useful evidence that is not an active rule.
 
-A learning enters the reusable template only when it is classified as `core`. Adapter and project-specific learnings remain in the project. Historical learnings remain archived. A single run may justify an adapter rule; core promotion normally requires repetition or an important safety/integrity reason.
+**Promotion.** During post-mortem, the Architect promotes an item only when it appears in at least two post-mortems, or the subagent tagged it `must-promote` with justification. Promoted items move to `learnings/promoted.md` (a single file). A `core` item may then be proposed for `CORE_PROTOCOL.md`; adapter and project-specific items stay local; historical items stay archived.
+
+**Pruning.** Every 10 relays, or monthly, the Architect archives `pending.md` items older than 30 days that were never promoted.
 
 ## Telemetry
 
