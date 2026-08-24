@@ -65,7 +65,18 @@ Choose verification depth according to the artifact changed:
 4. **Browser/DOM:** required when UI, HTML rendering, CSS behavior, or client-side JavaScript changes. Check console errors and key DOM/state properties.
 5. **Visual screenshot:** optional. If unavailable or failing, do not loop on the vision provider; use browser console/DOM checks as the fallback.
 
-The adapter declares exact commands and available tools. The core defines the required evidence categories, not a universal command set.
+The adapter declares exact commands and available tools. The core defines the required evidence categories, not a universal command set. Verification is not satisfied by judgment alone — every relay declares machine-verifiable `success_criteria:` (next section) that the gate evaluates deterministically.
+
+## Machine-verifiable success criteria
+
+Every relay must declare `success_criteria:` as machine-checkable items that a deterministic verifier evaluates without judgment. Supported types:
+
+- `test_id` — a named test, identified by its exact ID, that must pass;
+- `diff_check` — a file plus a literal string it must contain;
+- `checksum` — a file plus the expected hash of its contents;
+- `exit_code` — a command plus its expected exit code.
+
+The gate passes only when **all** declared checks pass. The Architect reads the report and the check results, not raw output. Where a check is machine-evaluable, no second judgment is applied — the model is removed from that verification path.
 
 ## Git and workspace safety
 
@@ -99,6 +110,7 @@ Apply the first matching rule:
 | Environment blocker | Missing daemon, package, credential, or permission cannot be fixed within scope | Stop immediately; do not burn retries. |
 | Spec drift | Test or path is wrong because the relay is underspecified | Prune context, correct relay, retry. |
 | Execution error | Subagent failed to execute an otherwise valid relay | Retry with a focused correction; two consecutive failures escalate. |
+| Machine check failed | A valid declared `success_criteria` check did not pass | Retry with a focused correction; two consecutive failures escalate. |
 | Contract failure | Code passes but handover/evidence is incomplete | Metadata-only retry. |
 | Validation cleared | Independent evidence matches scope and contract | Mark complete and unlock the next step. |
 

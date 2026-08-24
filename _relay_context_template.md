@@ -50,6 +50,21 @@ Run these commands verbatim and preserve complete output:
 4. Browser/DOM assertion for HTML/CSS/JS changes:
    Use the browser/DOM assertion tool(s) provided by the adapter to check zero JS errors, required DOM/CSS properties, image loading, and relevant state transitions. If the visual tool is unavailable, use DOM/property checks and record the fallback.
 
+## Success criteria
+Machine-checkable pass conditions — the gate passes only when all hold:
+
+success_criteria:
+  - type: test_id
+    value: {TEST_ID}
+  - type: diff_check
+    file: {ABSOLUTE_PATH}
+    contains: "{EXPECTED_LITERAL}"
+  - type: exit_code
+    command: {ADAPTER_COMMAND}
+    expected: {EXIT_CODE}
+
+Also supported: `type: checksum` (a file plus its expected hash).
+
 ## Stop conditions
 - STOP if the repository root or target boundary is ambiguous.
 - STOP if a required environment capability is missing.
