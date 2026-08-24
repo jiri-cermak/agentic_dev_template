@@ -8,7 +8,7 @@ Copy this template into the relay dispatch. Replace every `{...}` placeholder be
 **Project:** {PROJECT_NAME}
 **Project root:** {PROJECT_ROOT}
 **Task ID:** {TASK_ID}
-**Tier:** {full|lite}
+**Tier:** {minimal|standard|full}
 **max_attempts:** {3}
 **escalation_policy:** {human_retry | skip_on_fail | block_and_continue}
 **progress_interval:** {5}
@@ -61,21 +61,32 @@ capability_needs:
   - capability: compression_safety
     fallback: manual_context_checkpoints
 
+## Shape contract (Standard and Full tiers)
+Exact data shapes, API signatures, decorators, model fields. No pseudocode.
+
+- `{FIELD_NAME}`: {TYPE} — {DESCRIPTION}
+- `{API_SIGNATURE}`: {EXPECTED_BEHAVIOR}
+- `{DECORATOR_NAME}`: {PURPOSE}
+
+The testing methodology must include at least one shape assertion validating a declared field type, response structure, signature, or decorator.
+
 ## Testing methodology
 Run these commands verbatim and preserve complete output:
 
 1. Structural assertion:
    `{STRUCTURAL_TEST_COMMAND}`
-2. Negative assertion:
+2. Negative assertion (asserts something should NOT happen):
    `{NEGATIVE_TEST_COMMAND}`
-3. Runtime assertion, if applicable:
+3. Shape assertion (when a shape contract is present):
+   `{SHAPE_ASSERTION_COMMAND}`
+4. Runtime assertion, if applicable:
    Start `{SERVER_COMMAND}` with the terminal background-process tool, then:
    `{RUNTIME_TEST_COMMAND}`
-4. Browser/DOM assertion for HTML/CSS/JS changes:
+5. Browser/DOM assertion for HTML/CSS/JS changes:
    Use the browser/DOM assertion tool(s) provided by the adapter to check zero JS errors, required DOM/CSS properties, image loading, and relevant state transitions. If the visual tool is unavailable, use DOM/property checks and record the fallback.
 
 ## Success criteria
-Machine-checkable pass conditions — the gate passes only when all hold:
+Machine-checkable pass conditions — the gate passes only when all hold. **Required at every tier; a reduced handover never removes these.**
 
 success_criteria:
   - type: test_id
@@ -89,17 +100,30 @@ success_criteria:
 
 Also supported: `type: checksum` (a file plus its expected hash).
 
+## Pre-flight command (Full tier)
+Before starting work, run this command and paste the raw output:
+`{PRE_FLIGHT_COMMAND}`
+
+## Shared resource contract (Full tier)
+What this task CREATES and USES:
+
+| Resource | Type | Created/Used |
+|---|---|---|
+| {RESOURCE_NAME} | {filter|URL|module|model|template} | {created|used|none} |
+
+Even if "none", state it explicitly.
+
 ## Stop conditions
-- STOP if the repository root or target boundary is ambiguous.
-- STOP if a required environment capability is missing.
+- ⚠️ STOP if the repository root or target boundary is ambiguous. Run `cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel`. Paste raw output. Do NOT describe.
+- ⚠️ STOP if a required environment capability is missing and the adapter does not authorize remediation. Run `{PRE_FLIGHT_COMMAND}`. Paste raw output. Do NOT describe.
 - STOP on a repeated error signature.
 - STOP if a test failure indicates missing or contradictory specification.
 - STOP if the staged file list contains anything outside target files.
 - On exhausting `max_attempts`, write `handovers/{TASK_ID}/failure_postmortem.md` (see Failure escalation in `CORE_PROTOCOL.md`).
 - Write `handovers/{TASK_ID}/progress.md` every `progress_interval` steps; check for `handovers/{TASK_ID}/abort.md` between steps and, if present, stop cleanly with a partial handover.
 
-## Lite relay
-Select `tier: lite` only when all hold: touches ≤2 files, no new dependency, existing test coverage, reversible (no schema/state change). A lite relay uses a one-paragraph task spec and a two-heading handover:
+## Reduced handover (any tier)
+A relay whose change is small and reversible may use a reduced handover: a one-paragraph task spec and a two-heading handover:
 
 ## Summary
 {ONE_PARAGRAPH_RESULT}
@@ -107,19 +131,19 @@ Select `tier: lite` only when all hold: touches ≤2 files, no new dependency, e
 ## Diff
 {DIFF_OF_CHANGES}
 
-The Architect spot-checks the diff rather than re-running every test. `success_criteria:` still apply.
+Qualify only when all hold: touches ≤2 files, no new dependency, existing test coverage, reversible (no schema/state change). The reduced handover changes format and context only — `success_criteria:` still applies and the full gate matrix is unchanged.
 
 ## Handover
 Write to `{HANDOVER_PATH}` using exactly these headings:
 
 ## Raw Test Output
-Complete, unabridged output for every declared test, including browser/DOM evidence when applicable.
+Complete, unabridged output for every declared test. Never summarize. Never "all tests passed."
 
 ## Git Evidence
 Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, `git diff --cached --name-only` (captured before commit), and `git status --short`.
 
 ## Files Changed
-| File Path | Action | Lines Added | Lines Deleted |
+| File Path | Action | Size (bytes) | First Line |
 |---|---|---|---|
 
 ## Surprises Checklist
@@ -130,10 +154,10 @@ Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, `git di
 - [ ] No undeclared dependency was added.
 - [ ] No untracked asset was staged unintentionally.
 
-Describe any checked surprise below the checklist.
+If ANY box is checked → describe exactly what happened below.
 
 ## Contract Enforcement
-State where the structural and negative assertions appear in raw output. Include runtime/browser evidence when applicable. State model/provider, thinking mode, and whether steps were parallelized.
+State where the structural, negative, and shape assertions appear in raw output. Include runtime/browser evidence when applicable. State model/provider, thinking mode, and whether steps were parallelized.
 
 ## Commit
 Before committing:
@@ -149,4 +173,4 @@ EOF
 Never use `git add -A` or `git add .`.
 ```
 
-The Architect independently re-runs the declared tests before accepting the step.
+The Architect independently re-runs the declared tests before accepting the step. Verify the subagent's commit is the latest (`git log -1`) before re-execution.
