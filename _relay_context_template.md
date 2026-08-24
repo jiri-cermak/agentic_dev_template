@@ -30,10 +30,14 @@ At `max_depth` > 1, the subagent may spawn children with a reduced-scope relay c
 - `{ABSOLUTE_PATH}` — create | modify
 
 ## Out of scope
-- `.agents.md`, `CORE_PROTOCOL.md`, `.internal_master_plan.md`, `devlog.md`
-- `handovers/`, `learnings/`, `.git/`
+- `.agents.md`, `CORE_PROTOCOL.md`, `SOUL.md`, `.internal_master_plan.md`, `devlog.md`
+- `.git/`
+- `learnings/promoted.md`
+- other tasks' `handovers/{TASK_ID}/`
 - {PROJECT_SPECIFIC_PROTECTED_FILES}
 - Any file not listed above
+
+Writable exceptions: the subagent's own `handovers/{TASK_ID}/` and append-only `learnings/pending.md`.
 
 ## Study
 - `{REFERENCE_FILE}` when the task depends on prior work or a specification
