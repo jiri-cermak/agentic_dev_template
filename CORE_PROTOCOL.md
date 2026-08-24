@@ -180,14 +180,14 @@ A relay may declare `max_depth:` (default 1, nominal maximum 3). At `max_depth` 
 
 ## Learning lifecycle
 
-Subagents log every observation to `learnings/pending.md` (a single append-only file, not per-item files). Each entry carries one classification:
+Subagents log every observation to `learnings/pending.md` as a single atomic append-only line per task — never read-modify-write, so concurrent relays cannot clobber each other. Each entry carries one classification:
 
 - **core:** project-agnostic orchestration or evidence rule;
 - **adapter:** toolchain, environment, provider, or test-runner rule;
 - **project-specific:** domain, design, asset, or product rule;
 - **historical:** useful evidence that is not an active rule.
 
-**Promotion.** During post-mortem, the Architect promotes an item only when it appears in at least two post-mortems, or the subagent tagged it `must-promote` with justification. Promoted items move to `learnings/promoted.md` (a single file). A `core` item may then be proposed for `CORE_PROTOCOL.md`; adapter and project-specific items stay local; historical items stay archived.
+**Promotion.** The Architect is the sole reader and promoter of `pending.md`. During post-mortem, the Architect promotes an item only when it appears in at least two post-mortems, or the subagent tagged it `must-promote` with justification. Promoted items move to `learnings/promoted.md` (a single file). A `core` item may then be proposed for `CORE_PROTOCOL.md`; adapter and project-specific items stay local; historical items stay archived.
 
 **Pruning.** Every 10 relays, or monthly, the Architect archives `pending.md` items older than 30 days that were never promoted.
 
