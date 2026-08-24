@@ -164,6 +164,16 @@ Each capability declares a `fallback` — the behavior used when it is `not_avai
 
 The adapter must document which capabilities it provides and how each maps. A capability the adapter does not provide degrades to its fallback, never to silence.
 
+## Progress and abort
+
+Long relays report progress. The subagent writes `handovers/{TASK_ID}/progress.md` every `progress_interval` steps (default 5), recording:
+
+- the current step;
+- files touched so far;
+- a percent-complete estimate.
+
+The Architect may read `progress.md` at any time. To abort, the Architect writes `handovers/{TASK_ID}/abort.md` with the reason. The subagent checks for `abort.md` between steps and, on finding it, stops cleanly and writes a partial handover (what was done, what remains).
+
 ## Learning lifecycle
 
 Subagents log every observation to `learnings/pending.md` (a single append-only file, not per-item files). Each entry carries one classification:
