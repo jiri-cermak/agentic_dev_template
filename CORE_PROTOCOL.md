@@ -1,6 +1,8 @@
 # Tiered Relay Architecture v6 — Core Protocol
 
-This document defines the project-agnostic orchestration loop. It does not define a project's stack, tools, domain, or deployment environment. Those belong in the project adapter (`AGENTS.md` and the relay context template).
+This document defines the project-agnostic orchestration loop. It does not define a project's stack, tools, domain, or deployment environment. Those belong in the project adapter (`.agents.md` and the relay context template).
+
+**Agnosticism principle:** Core files use `{PLACEHOLDER}` tokens and generic capability verbs only; concrete tool/CLI names live in adapters.
 
 ## Roles
 
@@ -13,7 +15,7 @@ This document defines the project-agnostic orchestration loop. It does not defin
 1. **Plan** — classify the requirement and create/update `.internal_master_plan.md`.
 2. **Pre-flight** — verify repository root, clean/known working tree, target paths, and adapter readiness.
 3. **Relay** — construct a self-contained Markdown context with absolute paths, scope, constraints, tests, stop conditions, and handover contract.
-4. **Delegate** — call `delegate_task` with the context directly. Do not use JSON relay payload files.
+4. **Delegate** — dispatch the relay context directly. Do not use JSON relay payload files.
 5. **Execute** — subagent edits only target files, validates, commits explicit files, and writes post-commit handover evidence.
 6. **Verify** — Architect audits the handover and independently re-runs the declared tests.
 7. **Gate** — pass, retry with a classified correction, or stop/escalate.
@@ -51,7 +53,7 @@ cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel
 
 Do not rely on a `workdir` metadata field unless the runtime has independently demonstrated that it changes the actual working directory. Absolute paths remain mandatory.
 
-**Skill isolation:** Rename `AGENTS.md` to `.agents.md` (dotfile) in every project. The runtime scans only `.hermes.md`, `AGENTS.md`, `CLAUDE.md`, and `.cursorrules` for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the runtime from injecting project context as a virtual skill. The relay context is the subagent's sole source of rules.
+**Skill isolation:** Keep the project adapter as a dotfile in every project. The harness scans a fixed set of project-convention files (concrete filenames defined in the adapter) for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the harness from injecting project context as a virtual skill. The relay context is the subagent's sole source of rules.
 
 ## Verification levels
 

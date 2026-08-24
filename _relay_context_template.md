@@ -1,12 +1,15 @@
-# Relay Context Template — v6
+# Relay Context Template
 
-Copy this context into `delegate_task`. Replace every `{...}` placeholder before delegation.
+Copy this template into the relay dispatch. Replace every `{...}` placeholder before delegation. Read `CORE_PROTOCOL.md` first — it defines the lifecycle and gates.
+
+**Skill isolation:** Keep the project adapter as a dotfile in every project. The harness scans a fixed set of project-convention files (concrete filenames defined in the adapter) for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the harness from injecting it as a virtual skill. The relay context is the subagent's sole source of rules.
 
 ```markdown
 **Project:** {PROJECT_NAME}
 **Project root:** {PROJECT_ROOT}
 **Task ID:** {TASK_ID}
-**Execution profile:** thinking_type: {disabled|enabled}; reasoning_effort: {null|high}
+**Execution profile:** thinking_type: {disabled|enabled}; reasoning_effort: {null|low|medium|high}
+**Model/provider:** record actual delegated model/provider
 
 ## Location pre-flight
 The first command must be:
@@ -17,20 +20,22 @@ Do not rely on workdir metadata. Use absolute paths for all target files.
 {SELF_CONTAINED_TASK_DESCRIPTION}
 
 ## Target files
-- `{ABSOLUTE_TARGET_PATH}` — create | modify
+- `{ABSOLUTE_PATH}` — create | modify
 
 ## Out of scope
-- `{ABSOLUTE_OR_RELATIVE_PATH_NOT_TO_TOUCH}`
+- `.agents.md`, `CORE_PROTOCOL.md`, `.internal_master_plan.md`, `devlog.md`
+- `handovers/`, `learnings/`, `.git/`
+- {PROJECT_SPECIFIC_PROTECTED_FILES}
+- Any file not listed above
 
-## Constraints
-**Study:**
-- `{REFERENCE_FILE}`
+## Study
+- `{REFERENCE_FILE}` when the task depends on prior work or a specification
 
-**Adapter boundaries:**
-- Allowed tools: {ALLOWED_TOOLS}
-- Unavailable tools: {UNAVAILABLE_TOOLS}
-- Dependency policy: {DEPENDENCY_POLICY}
-- Build/deploy policy: {BUILD_DEPLOY_POLICY}
+## Adapter boundaries
+- Allowed: {ALLOWED_TOOLS}
+- No: {UNAVAILABLE_TOOLS}
+- {ADDITIONAL_CONSTRAINTS}
+- No `git add -A` or `git add .`
 
 ## Testing methodology
 Run these commands verbatim and preserve complete output:
@@ -40,30 +45,30 @@ Run these commands verbatim and preserve complete output:
 2. Negative assertion:
    `{NEGATIVE_TEST_COMMAND}`
 3. Runtime assertion, if applicable:
-   `{RUNTIME_TEST_COMMAND_OR_NOT_APPLICABLE}`
-4. Browser/DOM assertion, if UI or client-side behavior changes:
-   `{BROWSER_TEST_COMMAND_OR_NOT_APPLICABLE}`
-
-Use the project's adapter rules. Do not substitute tools or weaken assertions without recording the change as a surprise.
+   Start `{SERVER_COMMAND}` with the terminal background-process tool, then:
+   `{RUNTIME_TEST_COMMAND}`
+4. Browser/DOM assertion for HTML/CSS/JS changes:
+   Use the browser/DOM assertion tool(s) provided by the adapter to check zero JS errors, required DOM/CSS properties, image loading, and relevant state transitions. If the visual tool is unavailable, use DOM/property checks and record the fallback.
 
 ## Stop conditions
 - STOP if the repository root or target boundary is ambiguous.
-- STOP if a required environment capability is missing and the adapter does not authorize remediation.
-- STOP on a repeated error signature; do not consume further retries.
-- STOP if a test failure indicates a missing or contradictory specification rather than attempting unrelated fixes.
+- STOP if a required environment capability is missing.
+- STOP on a repeated error signature.
+- STOP if a test failure indicates missing or contradictory specification.
+- STOP if the staged file list contains anything outside target files.
 
 ## Handover
-Write to `{PROJECT_ROOT}/handovers/done/completion-{TASK_ID}.md` using exactly these headings:
+Write to `{HANDOVER_PATH}` using exactly these headings:
 
 ## Raw Test Output
-Complete, unabridged output for every declared test.
+Complete, unabridged output for every declared test, including browser/DOM evidence when applicable.
 
 ## Git Evidence
-Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, and `git status --short`.
+Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, `git diff --cached --name-only` (captured before commit), and `git status --short`.
 
 ## Files Changed
 | File Path | Action | Lines Added | Lines Deleted |
-|---|---|---:|---:|
+|---|---|---|---|
 
 ## Surprises Checklist
 - [ ] Every command succeeded on first attempt.
@@ -71,23 +76,25 @@ Post-commit output for `git log --oneline -1`, `git diff HEAD~1 --stat`, and `gi
 - [ ] No test needed adjustment.
 - [ ] No file outside target files was modified.
 - [ ] No undeclared dependency was added.
+- [ ] No untracked asset was staged unintentionally.
 
 Describe any checked surprise below the checklist.
 
 ## Contract Enforcement
-State where the structural and negative assertions appear in the raw output. Include runtime/browser evidence when applicable.
+State where the structural and negative assertions appear in raw output. Include runtime/browser evidence when applicable. State model/provider, thinking mode, and whether steps were parallelized.
 
 ## Commit
-Before committing, run:
+Before committing:
 `git diff --cached --name-only`
-Stage only the explicit target files. Never use `git add -A` or `git add .`.
-Commit with:
+Verify that every staged path is an explicit target and no other path is staged. Then:
 
 ```bash
 git commit -F - << 'EOF'
 {TASK_ID}: short description
 EOF
 ```
+
+Never use `git add -A` or `git add .`.
 ```
 
-The Architect independently reruns the declared tests before accepting the step.
+The Architect independently re-runs the declared tests before accepting the step.

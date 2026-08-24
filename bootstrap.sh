@@ -29,15 +29,16 @@ else
 fi
 
 cp "$BOOTSTRAP_DIR/CORE_PROTOCOL.md" "$TARGET/CORE_PROTOCOL.md"
-cp "$BOOTSTRAP_DIR/AGENTS.md" "$TARGET/AGENTS.md"
+cp "$BOOTSTRAP_DIR/.agents.md" "$TARGET/.agents.md"
 cp "$BOOTSTRAP_DIR/SOUL.md" "$TARGET/SOUL.md"
+cp "$BOOTSTRAP_DIR/_relay_context_template.md" "$TARGET/_relay_context_template.md"
 echo "  ✓ CORE_PROTOCOL.md"
-echo "  ✓ AGENTS.md"
+echo "  ✓ .agents.md"
 echo "  ✓ SOUL.md"
+echo "  ✓ _relay_context_template.md"
 
 mkdir -p "$TARGET/handovers/done" "$TARGET/handovers/archive"
-cp "$BOOTSTRAP_DIR/_relay_context_template.md" "$TARGET/handovers/_relay_context_template.md"
-echo "  ✓ handovers/_relay_context_template.md"
+echo "  ✓ handovers/ (runtime dirs)"
 
 mkdir -p "$TARGET/learnings"
 echo "  ✓ learnings/"
@@ -57,7 +58,7 @@ echo "  ✓ .git/info/exclude"
 
 echo ""
 echo "Done. Next steps:"
-echo "  1. Replace {PLACEHOLDERS} in $TARGET/AGENTS.md"
-echo "  2. Replace {PLACEHOLDERS} in $TARGET/handovers/_relay_context_template.md"
+echo "  1. Replace {PLACEHOLDERS} in $TARGET/.agents.md"
+echo "  2. Replace {PLACEHOLDERS} in $TARGET/_relay_context_template.md"
 echo "  3. Create the initial master plan in $TARGET/.internal_master_plan.md"
 echo "  4. Start: plan → pre-flight → relay → delegate → verify"

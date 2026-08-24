@@ -1,0 +1,32 @@
+name: Core agnosticism boundary
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  no-harness-leaks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan core files for harness-specific leaks
+        run: |
+          set -euo pipefail
+          # Core files that must remain project- and harness-agnostic.
+          # adapters/ is exempt by design.
+          CORE_FILES=(
+            CORE_PROTOCOL.md
+            SOUL.md
+            .agents.md
+            bootstrap.sh
+            _relay_context_template.md
+          )
+          # Any harness name leaking into a core file is a boundary violation.
+          # Denylist covers both delegation/brand names and concrete tool/CLI names.
+          if grep -rniE "dsh|delegate_task|deepseek|hermes|browser_navigate|browser_console|browser_vision" "${CORE_FILES[@]}"; then
+            echo "::error::Harness-specific name leaked into a core file (see matches above)."
+            exit 1
+          fi
+          echo "Core files are harness-agnostic: no leaks detected."
