@@ -130,9 +130,26 @@ Apply the first matching rule:
 | Contract failure | Code passes but handover/evidence is incomplete | Metadata-only retry. |
 | Validation cleared | Independent evidence matches scope and contract | Mark complete and unlock the next step. |
 
-Maximum: three attempts per task ID. A repeated error signature is a hard stop, not an invitation to consume the remaining budget.
+Maximum: `max_attempts` attempts per task ID (default 3). A repeated error signature is a hard stop, not an invitation to consume the remaining budget. Exhausting all attempts is never silent — see Failure escalation.
 
 Lite relays (see Relay tiers) apply a reduced matrix — `fabrication`, `contract failure`, and `validation cleared` only.
+
+## Failure escalation
+
+Exhausting `max_attempts` (default 3) is never silent. The subagent writes `handovers/{TASK_ID}/failure_postmortem.md` before stopping, with exactly these fields:
+
+- **Root-cause hypothesis** — the most likely reason the relay failed;
+- **Diff of each attempt** — what changed between attempt N and N+1;
+- **Concrete blocker question** — the single question whose answer would unblock the work;
+- **Suggested next action** — retry with revised context, escalate to human, or skip.
+
+The Architect reviews the postmortem and chooses one:
+
+1. **Retry with revised context** — rewrite the relay with the new information; the attempt counter resets.
+2. **Escalate to human** — record the blocker in `devlog.md` and notify if a gateway is available.
+3. **Mark blocked, continue** — mark the task blocked and proceed to the next task in the plan.
+
+The relay's `escalation_policy` preselects the default: `human_retry` escalates for the retry decision, `skip_on_fail` skips and moves on, `block_and_continue` marks blocked and continues. Lite relays default to `skip_on_fail`; full relays default to `human_retry`.
 
 ## Learning lifecycle
 

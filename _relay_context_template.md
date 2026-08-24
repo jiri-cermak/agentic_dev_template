@@ -9,6 +9,8 @@ Copy this template into the relay dispatch. Replace every `{...}` placeholder be
 **Project root:** {PROJECT_ROOT}
 **Task ID:** {TASK_ID}
 **Tier:** {full|lite}
+**max_attempts:** {3}
+**escalation_policy:** {human_retry | skip_on_fail | block_and_continue}
 **Execution profile:** thinking_type: {disabled|enabled}; reasoning_effort: {null|low|medium|high}
 **Model/provider:** record actual delegated model/provider
 
@@ -72,6 +74,7 @@ Also supported: `type: checksum` (a file plus its expected hash).
 - STOP on a repeated error signature.
 - STOP if a test failure indicates missing or contradictory specification.
 - STOP if the staged file list contains anything outside target files.
+- On exhausting `max_attempts`, write `handovers/{TASK_ID}/failure_postmortem.md` (see Failure escalation in `CORE_PROTOCOL.md`).
 
 ## Lite relay
 Select `tier: lite` only when all hold: touches ≤2 files, no new dependency, existing test coverage, reversible (no schema/state change). A lite relay uses a one-paragraph task spec and a two-heading handover:
