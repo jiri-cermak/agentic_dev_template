@@ -55,6 +55,22 @@ Do not rely on a `workdir` metadata field unless the runtime has independently d
 
 **Skill isolation:** Keep the project adapter as a dotfile in every project. The harness scans a fixed set of project-convention files (concrete filenames defined in the adapter) for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the harness from injecting project context as a virtual skill. The relay context is the subagent's sole source of rules.
 
+## Relay tiers
+
+The Architect classifies each relay before delegation:
+
+- **Full** — the standard relay: full context, the five-heading handover, and the full gate matrix.
+- **Lite** — a minimal relay for small, reversible, well-covered changes: a one-paragraph task spec, a two-heading handover (`## Summary`, `## Diff`), and the Architect spot-checks the diff instead of re-running every test.
+
+A relay qualifies for `lite` only when **all** hold:
+
+- it touches at most two files;
+- it adds no new dependency;
+- existing test coverage applies (the Architect writes no new tests);
+- it is reversible (no schema migration, no state change).
+
+Lite relays still declare `success_criteria:`; the machine checks apply unchanged to the reduced set.
+
 ## Verification levels
 
 Choose verification depth according to the artifact changed:
@@ -115,6 +131,8 @@ Apply the first matching rule:
 | Validation cleared | Independent evidence matches scope and contract | Mark complete and unlock the next step. |
 
 Maximum: three attempts per task ID. A repeated error signature is a hard stop, not an invitation to consume the remaining budget.
+
+Lite relays (see Relay tiers) apply a reduced matrix — `fabrication`, `contract failure`, and `validation cleared` only.
 
 ## Learning lifecycle
 
