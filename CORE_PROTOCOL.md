@@ -57,6 +57,7 @@ Every relay context must contain:
 - absolute target file paths with create/modify action;
 - files explicitly out of scope;
 - adapter-declared tool and dependency boundaries;
+- **explicit tool restriction** — a list of tools the subagent must NOT invoke for this task (test runners, container/daemon/remote-shell access, package managers, network), separate from the allowed-tool list; the Architect audits the subagent's execution record for forbidden-tool invocations and treats any hit as a **gate failure** (contract category), never a warning;
 - verbatim testing methodology with at least one structural assertion and one negative assertion;
 - **shape contract** (Standard and Full tiers): exact data shapes, API signatures, decorators, fields — no pseudocode; the testing methodology must include at least one shape assertion;
 - stop conditions for known environment dead ends;
@@ -72,6 +73,33 @@ cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel
 Do not rely on a `workdir` metadata field unless the runtime has independently demonstrated that it changes the actual working directory. Absolute paths remain mandatory.
 
 **Skill isolation:** Keep the project adapter as a dotfile in every project. The harness scans a fixed set of project-convention files (concrete filenames defined in the adapter) for auto-discovery. A dotfile is invisible to progressive subdirectory discovery, preventing the harness from injecting project context as a virtual skill. The relay context is the subagent's sole source of rules.
+
+## Execution record schema
+
+Every relay must include an execution record — a JSONL log of tool calls the subagent makes during execution. The subagent appends one line per tool invocation to `handovers/{TASK_ID}/execution_record.jsonl` as it works.
+
+**Schema (one JSON object per line):**
+
+```json
+{"timestamp": "2026-10-19T14:32:00Z", "tool_name": "terminal", "tool_args_hash": "sha256:abc123...", "denied_flag": false}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `timestamp` | string | ISO 8601 timestamp of the tool call. |
+| `tool_name` | string | The tool invocation name (e.g., `terminal`, `file_edit`). |
+| `tool_args_hash` | string | SHA-256 hash of the canonicalized tool arguments — never store raw arguments (may contain secrets). |
+| `denied_flag` | boolean | `true` if the tool appears in the relay's deny-list; `false` otherwise. |
+
+**Example execution record (3 lines):**
+
+```jsonl
+{"timestamp": "2026-10-19T14:30:01Z", "tool_name": "terminal", "tool_args_hash": "sha256:a1b2c3...", "denied_flag": false}
+{"timestamp": "2026-10-19T14:30:05Z", "tool_name": "file_read", "tool_args_hash": "sha256:d4e5f6...", "denied_flag": false}
+{"timestamp": "2026-10-19T14:30:12Z", "tool_name": "terminal", "tool_args_hash": "sha256:g7h8i9...", "denied_flag": false}
+```
+
+**Architect gate:** During verification, the Architect parses `execution_record.jsonl` and checks each entry's `denied_flag`. Any `denied_flag: true` is an immediate **gate failure** (contract category). The Architect does not proceed to test re-execution until the execution record is clean.
 
 ## Reduced handover (any tier)
 
@@ -122,6 +150,18 @@ Choose verification depth according to the artifact changed:
 
 The adapter declares exact commands and available tools. The core defines the required evidence categories, not a universal command set. Verification is not satisfied by judgment alone — every relay declares machine-verifiable `success_criteria:` (next section) that the gate evaluates deterministically.
 
+### Impeccable design gates (UI relays)
+
+When a relay changes UI, HTML, CSS, or client-side behavior, the subagent must run the impeccable design gates declared by the adapter before committing. The adapter defines the exact commands, thresholds, and available tools.
+
+| Gate | Purpose | Pass condition |
+|---|---|---|
+| detect | Anti-pattern scanner — flags code smells, duplicated markup, inaccessible patterns, unsemantic HTML | Zero findings |
+| audit | Accessibility, performance, and responsive audit — WCAG compliance, render performance, viewport adaptation | No critical findings |
+| critique | UX heuristic scoring — rates the interface against Nielsen-style heuristics | Score above adapter-defined threshold |
+
+These gates are additive to the standard verification levels — they do not replace structural, negative, shape, or runtime assertions. Their results appear in the handover under `## Contract Enforcement`. The Architect audits the subagent's execution record for gate invocations; skipping a declared design gate is a **gate failure** (contract category), never a warning.
+
 ## Machine-verifiable success criteria
 
 Every relay must declare `success_criteria:` as machine-checkable items that a deterministic verifier evaluates without judgment. Supported types:
@@ -167,13 +207,39 @@ Apply the first matching rule (precedence order):
 | 1 (highest) | Fabrication | Claimed evidence contradicts the workspace or cannot be reproduced | Stop and escalate immediately. Trust breach. Do NOT retry. |
 | 2 | Stagnation | Same error signature recurs after a correction | Stop, record signature, escalate. |
 | 3 | Environment blocker | Missing daemon, package, credential, or permission cannot be fixed within scope | Stop immediately; do not burn retries. |
-| 4 | Spec drift | Test or path is wrong because the relay is underspecified | Prune context, correct relay, retry. Log to `retry_context.json` (type `spec_error`). |
+| 4 | Spec drift | Test or path is wrong because the relay is underspecified | Prune context, correct relay, retry. Log to `retry_context.json` (type `spec_drift`). |
 | 5 | Execution error | Subagent failed to execute an otherwise valid relay | Retry with a focused correction; two consecutive failures escalate. Log to `retry_context.json` (type `execution_error`). |
 | 6 | Machine check failed | A valid declared `success_criteria` check did not pass | Retry with a focused correction; two consecutive failures escalate. |
 | 7 | Contract failure | Code passes but handover/evidence is incomplete | Metadata-only retry. |
 | 8 (lowest) | Validation cleared | Independent evidence matches scope and contract | Mark complete and unlock the next step. |
 
 Maximum: `max_attempts` attempts per task ID (default 3). A repeated error signature is a hard stop, not an invitation to consume the remaining budget. Exhausting all attempts is never silent — see Failure escalation.
+
+## Retry context schema
+
+`retry_context.json` records each retry attempt for a task. The Architect writes it before retrying after a gate failure (spec drift or execution error). It enables stagnation detection across attempts.
+
+```json
+{
+  "task_id": "STEP-01",
+  "attempt_number": 2,
+  "error_signature": "TypeError: cannot read property 'id' of undefined",
+  "error_type": "execution_error",
+  "correction_applied": "Added explicit null check before accessing response.id in parser",
+  "timestamp": "2026-10-19T14:32:00Z"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `task_id` | string | The relay task identifier (matches the task ID in the relay context). |
+| `attempt_number` | integer | 1-based attempt counter for this task ID. |
+| `error_signature` | string | A stable hash or canonical string identifying the failure mode. Used to detect stagnation. |
+| `error_type` | enum | One of: `fabrication`, `stagnation`, `environment`, `spec_drift`, `execution_error`. |
+| `correction_applied` | string | A concise description of the change made to the relay context for this attempt. |
+| `timestamp` | string | ISO 8601 timestamp of when the retry was initiated. |
+
+**Stagnation detection:** before retrying, the Architect reads `retry_context.json` and compares the new `error_signature` against prior entries. A match triggers the Stagnation gate (stop, record, escalate) — never retry the same failure.
 
 ## Failure escalation
 
@@ -191,6 +257,22 @@ The Architect reviews the postmortem and chooses one:
 3. **Mark blocked, continue** — mark the task blocked and proceed to the next task in the plan.
 
 The relay's `escalation_policy` preselects the default: `human_retry` escalates for the retry decision, `skip_on_fail` skips and moves on, `block_and_continue` marks blocked and continues. Minimal relays default to `skip_on_fail`; Standard and Full relays default to `human_retry`.
+
+## Plan-level retry governance
+
+Track consecutive blocked steps at the plan level. A step is **blocked** when it cannot complete due to an environment blocker, repeated stagnation, or exhausted attempts, and the Architect marks it `blocked` in `.internal_master_plan.md`.
+
+**Rule:** If **N consecutive steps are blocked** (default N=2), the Architect **pauses the entire plan** and escalates to the user. Do not continue executing remaining steps.
+
+When the threshold is reached:
+1. Set `plan_status` to `paused` in `.internal_master_plan.md`.
+2. Record the escalation in `devlog.md` with the blocker question from each blocked step's failure postmortem.
+3. Notify the user via the gateway if available; otherwise surface in the next interaction.
+4. Do NOT unlock dependent steps.
+
+The Architect may resume the plan after the user resolves the blocker(s) or explicitly authorizes continuing.
+
+**Example:** STEP-03 and STEP-04 are both blocked (environment blocker). N=2 → plan pauses. The Architect escalates: "Two consecutive steps are blocked. STEP-03: missing Docker daemon. STEP-04: database credentials unavailable. Please resolve or instruct me to skip."
 
 ## Capability negotiation
 
@@ -263,6 +345,7 @@ Write `.internal_master_plan.md` using this template:
 **Created:** {timestamp}
 **Last updated:** {timestamp}
 **Status:** {in_progress | completed}
+**plan_status:** {active | paused | escalated | completed | aborted}
 
 ## Steps
 

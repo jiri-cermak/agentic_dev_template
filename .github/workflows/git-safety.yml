@@ -1,0 +1,179 @@
+name: Git safety and handover contract enforcement
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # ---------------------------------------------------------------
+  # Job 1: Scan relay contexts for forbidden git commands.
+  # CORE_PROTOCOL.md "Git and workspace safety" section forbids:
+  #   git add -A | git add . | git clean -f | git reset --hard
+  # ---------------------------------------------------------------
+  scan-relay-contexts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan relay contexts for forbidden git patterns
+        run: |
+          set -euo pipefail
+
+          # Forbidden git commands from CORE_PROTOCOL.md safety rules.
+          FORBIDDEN_PATTERNS=(
+            "git add -A"
+            "git add ."
+            "git clean -f"
+            "git reset --hard"
+          )
+
+          # Find relay-context markdown files. Exclude the template itself,
+          # which legitimately mentions these patterns in "do not use" warnings.
+          mapfile -t RELAY_FILES < <(
+            find . -name '*relay*.md' -type f \
+              ! -name '_relay_context_template.md' \
+              ! -path './.git/*' | sort
+          )
+
+          if [ "${#RELAY_FILES[@]}" -eq 0 ]; then
+            echo "No relay context files found; nothing to scan."
+            exit 0
+          fi
+
+          VIOLATIONS=0
+          for f in "${RELAY_FILES[@]}"; do
+            for pat in "${FORBIDDEN_PATTERNS[@]}"; do
+              if grep -qF -- "$pat" "$f"; then
+                echo "::error::Relay context '$f' contains forbidden git pattern: '$pat'"
+                VIOLATIONS=$((VIOLATIONS + 1))
+              fi
+            done
+          done
+
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "::error::Found $VIOLATIONS forbidden git pattern(s) in relay context(s)."
+            exit 1
+          fi
+
+          echo "Relay contexts are clean: no forbidden git patterns detected."
+
+  # ---------------------------------------------------------------
+  # Job 2: Verify handover files contain all five required headings
+  # defined by the CORE_PROTOCOL.md handover contract.
+  # ---------------------------------------------------------------
+  verify-handovers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify handover files contain all five required headings
+        run: |
+          set -euo pipefail
+
+          REQUIRED_HEADINGS=(
+            "## Raw Test Output"
+            "## Git Evidence"
+            "## Files Changed"
+            "## Surprises Checklist"
+            "## Contract Enforcement"
+          )
+
+          mapfile -t HANDOVER_FILES < <(
+            find handovers -name '*.md' -type f 2>/dev/null | sort
+          )
+
+          if [ "${#HANDOVER_FILES[@]}" -eq 0 ]; then
+            echo "No handover files found; nothing to verify."
+            exit 0
+          fi
+
+          FAILURES=0
+          for f in "${HANDOVER_FILES[@]}"; do
+            for heading in "${REQUIRED_HEADINGS[@]}"; do
+              if ! grep -qF -- "$heading" "$f"; then
+                echo "::error::Handover '$f' is missing required heading: '$heading'"
+                FAILURES=$((FAILURES + 1))
+              fi
+            done
+          done
+
+          if [ "$FAILURES" -gt 0 ]; then
+            echo "::error::Found $FAILURES missing handover heading(s)."
+            exit 1
+          fi
+
+          echo "All handover files contain the five required headings."
+
+  # ---------------------------------------------------------------
+  # Job 3: Verify target_files declared in each relay context match
+  # the actual git diff for this push or pull request.
+  # ---------------------------------------------------------------
+  check-target-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify relay-context target_files match actual git diff
+        run: |
+          set -euo pipefail
+
+          mapfile -t RELAY_FILES < <(
+            find . -name '*relay*.md' -type f \
+              ! -name '_relay_context_template.md' \
+              ! -path './.git/*' | sort
+          )
+
+          if [ "${#RELAY_FILES[@]}" -eq 0 ]; then
+            echo "No relay context files found; skipping target_files check."
+            exit 0
+          fi
+
+          # Determine the commit range for the diff.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="HEAD~1"
+            HEAD_SHA="HEAD"
+          fi
+
+          git diff --name-only "$BASE" "$HEAD_SHA" | sort > /tmp/actual_diff.txt
+
+          if [ ! -s /tmp/actual_diff.txt ]; then
+            echo "No files changed in this push/PR; skipping comparison."
+            exit 0
+          fi
+
+          MISMATCHES=0
+          for f in "${RELAY_FILES[@]}"; do
+            # Extract backtick-quoted paths from the "## Target files" section.
+            TARGETS="$(sed -n '/^## Target files/,/^## [A-Z]/p' "$f" \
+              | grep -oP '(?<=`)[^`]+(?=`)' || true)"
+
+            if [ -z "$TARGETS" ]; then
+              continue
+            fi
+
+            while IFS= read -r tp; do
+              # Normalize absolute paths to repo-relative.
+              REL="${tp#"$GITHUB_WORKSPACE"/}"
+              REL="${REL#"$GITHUB_WORKSPACE"}"
+
+              if ! grep -qxF -- "$REL" /tmp/actual_diff.txt; then
+                echo "::error::Relay context '$f' declares target file '$tp' but it is not in the git diff."
+                MISMATCHES=$((MISMATCHES + 1))
+              fi
+            done <<< "$TARGETS"
+          done
+
+          if [ "$MISMATCHES" -gt 0 ]; then
+            echo "::error::Found $MISMATCHES target_file(s) not matching git diff."
+            exit 1
+          fi
+
+          echo "All relay-context target files match the actual git diff."

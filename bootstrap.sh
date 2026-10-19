@@ -66,7 +66,7 @@ echo "  ✓ .agents.md"
 echo "  ✓ SOUL.md"
 echo "  ✓ _relay_context_template.md"
 
-mkdir -p "$TARGET/handovers/done" "$TARGET/handovers/archive"
+mkdir -p "$TARGET/handovers" "$TARGET/handovers/archive"
 echo "  ✓ handovers/ (runtime dirs)"
 
 mkdir -p "$TARGET/learnings"

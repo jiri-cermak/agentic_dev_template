@@ -62,7 +62,7 @@ Start each DSH session with this message:
 
 ## First relay
 
-1. **Architect fills the relay template** (`handovers/_relay_context_template.md`):
+1. **Architect fills the relay template** (`_relay_context_template.md`):
    - Replace all `{...}` placeholders
    - Set `tier: minimal|standard|full`
    - Include shape contract (Standard/Full tiers)
@@ -81,7 +81,7 @@ Start each DSH session with this message:
    - Runs tests verbatim
    - Stages explicit files only
    - Commits
-   - Writes handover to `handovers/done/completion-{TASK_ID}.md`
+   - Writes handover to `handovers/{TASK_ID}/completion.md`
 
 4. **Architect verifies:**
    - Reads handover file
@@ -139,6 +139,6 @@ Re-validate after upgrades. The subagent tool API may change between releases.
 - CORE_PROTOCOL.md — orchestration rules
 - SOUL.md — Architect identity
 - .agents.md — project adapter
-- handovers/_relay_context_template.md — relay template
+- _relay_context_template.md — relay template
 - /opt/data/plans/dsh-core-plugin-list.md — recommended plugins
 - /opt/data/plans/dsh-agentic-template-adaptation-v2.md — full adaptation plan

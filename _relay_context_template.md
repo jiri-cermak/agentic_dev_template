@@ -48,6 +48,16 @@ Writable exceptions: the subagent's own `handovers/{TASK_ID}/` and append-only `
 - {ADDITIONAL_CONSTRAINTS}
 - No `git add -A` or `git add .`
 
+## Tool restriction (deny-list — a gate failure, not a warning)
+Do NOT invoke these tools, even if they are present in your toolset:
+- `{DENIED_TOOL_1}` — test runner
+- `{DENIED_TOOL_2}` — container / remote-shell / daemon access
+- `{DENIED_TOOL_3}` — package manager / network
+
+Invoking a denied tool is a **gate failure** (contract category). The Architect audits the
+execution record for these exact tools. If you believe a denied tool is required, STOP and
+write the failure postmortem — do not invoke it.
+
 ## Capability needs
 Declare only the capabilities this relay depends on; the adapter maps each to `available | degraded | not_available`. The Architect must check the adapter README for available capabilities before declaring a need.
 
@@ -84,6 +94,11 @@ Run these commands verbatim and preserve complete output:
    `{RUNTIME_TEST_COMMAND}`
 5. Browser/DOM assertion for HTML/CSS/JS changes:
    Use the browser/DOM assertion tool(s) provided by the adapter to check zero JS errors, required DOM/CSS properties, image loading, and relevant state transitions. If the visual tool is unavailable, use DOM/property checks and record the fallback.
+6. Impeccable design gates (when UI/CSS/JS changes):
+   Run the adapter-declared commands:
+   `{DETECT_COMMAND}` — anti-pattern scanner; zero findings required
+   `{AUDIT_COMMAND}` — a11y/perf/responsive audit; no critical findings
+   `{CRITIQUE_COMMAND}` — UX heuristic scoring; must pass adapter threshold
 
 ## Success criteria
 Machine-checkable pass conditions — the gate passes only when all hold. **Required at every tier; a reduced handover never removes these.**
@@ -134,7 +149,7 @@ A relay whose change is small and reversible may use a reduced handover: a one-p
 Qualify only when all hold: touches ≤2 files, no new dependency, existing test coverage, reversible (no schema/state change). The reduced handover changes format and context only — `success_criteria:` still applies and the full gate matrix is unchanged.
 
 ## Handover
-Write to `{HANDOVER_PATH}` using exactly these headings:
+Write to `handovers/{TASK_ID}/completion.md` using exactly these headings:
 
 ## Raw Test Output
 Complete, unabridged output for every declared test. Never summarize. Never "all tests passed."
@@ -158,6 +173,9 @@ If ANY box is checked → describe exactly what happened below.
 
 ## Contract Enforcement
 State where the structural, negative, and shape assertions appear in raw output. Include runtime/browser evidence when applicable. State model/provider, thinking mode, and whether steps were parallelized.
+
+## Execution Record
+Write `handovers/{TASK_ID}/execution_record.jsonl` during execution — one JSON line per tool call. Schema: `timestamp` (ISO 8601), `tool_name` (string), `tool_args_hash` (SHA-256 of canonicalized args), `denied_flag` (boolean — `true` if the tool is on this relay's deny-list). The Architect parses this file during the verification gate; any `denied_flag: true` is a **gate failure** (contract category). Do not store raw arguments — only their hash.
 
 ## Commit
 Before committing:
