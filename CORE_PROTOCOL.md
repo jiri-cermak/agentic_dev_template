@@ -198,6 +198,17 @@ Raw test output must be complete, not summarized. Git evidence must include the 
 
 **Files Changed table** carries, per file: Path, Action, Size (bytes), and First Line — alongside the machine-verifiable `checksum` in `success_criteria:`. The `checksum` is the gate; Size and First Line are a secondary sanity probe: for every file in the table, the Architect independently runs `wc -c <file>` and `head -1 <file>`, and any mismatch → **FAIL** (contract failure or fabrication).
 
+## Architect pre-flight verification
+
+The subagent writes `handovers/{TASK_ID}/pre-flight.md` before making any edit. The Architect verifies this record during the handover gate. The record must contain:
+
+1. Project root path (raw `pwd` output);
+2. First line of each target file;
+3. First line of the relay context file;
+4. Adapter boundary summary.
+
+**Missing or mismatched pre-flight is a context handoff failure (contract category).** The Architect compares each recorded value against the actual workspace state; any discrepancy → **FAIL**.
+
 ## Gate matrix
 
 Apply the first matching rule (precedence order):
@@ -313,6 +324,10 @@ Subagents log every observation to `learnings/pending.md` as a single atomic app
 **Promotion.** The Architect is the sole reader and promoter of `pending.md`. During post-mortem, the Architect promotes an item only when it appears in at least two post-mortems, or the subagent tagged it `must-promote` with justification. Promoted items move to `learnings/promoted.md` (a single file). A `core` item may then be proposed for `CORE_PROTOCOL.md`; adapter and project-specific items stay local; historical items stay archived.
 
 **Pruning.** Every 10 relays, or monthly, the Architect archives `pending.md` items older than 30 days that were never promoted.
+
+## Skill creation prohibition
+
+Do NOT create new Hermes skills via `skill_manage` that restate loop rules already defined in this protocol or the adapter. Skill proposals go to `learnings/pending.md` with a `core` classification; the Architect promotes them through the standard learning lifecycle.
 
 ## Step post-mortem and iteration
 

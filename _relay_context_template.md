@@ -21,6 +21,16 @@ The first command must be:
 `cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel`
 Do not rely on workdir metadata. Use absolute paths for all target files.
 
+## Context handoff pre-flight checklist
+Before making any edit, write `handovers/{TASK_ID}/pre-flight.md` with:
+
+1. **Project root:** raw output of `cd {PROJECT_ROOT} && pwd && git rev-parse --show-toplevel`.
+2. **Target file first lines:** for each target file, `head -1 {ABSOLUTE_PATH}` output.
+3. **Relay context first line:** the first line of this relay context.
+4. **Adapter boundary summary:** allowed tools, denied tools, and additional constraints.
+
+The Architect verifies this record during the handover. Missing or mismatched pre-flight is a context handoff failure (contract category).
+
 ## Task
 {SELF_CONTAINED_TASK_DESCRIPTION}
 
