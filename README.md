@@ -48,6 +48,8 @@ new-project/
 
 Internal state is excluded via `.git/info/exclude`. The bootstrap script never stages or commits project files.
 
+> **Agentic-loop workstream:** read [`OPEN-LOOP.md`](OPEN-LOOP.md) — state, parked items with triggers, next-bump items, and verification commands for the loop.
+
 ## Requirement tiers
 
 Classify by requirement clarity — clarity predicts iteration count, which drives cost.
