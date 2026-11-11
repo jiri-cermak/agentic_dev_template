@@ -1,1 +1,4 @@
-core | Probe→Discover→Refine→Implement fires on a genuine trade-off or conflicting constraint, not on looseness alone — a loose-but-harmless spec (pick a palette, pick a structure) has an obvious default and is correctly one-shot. Evidence: website probe test — 6 writes in one batch, 3 api calls, zero re-writes. must-promote: validated by Architect + validator + user; promoted to CORE_PROTOCOL.md iteration-pattern note.
+# Pending learnings (append-only)
+
+> Empty as of 2026-11-11: the single entry was promoted into CORE_PROTOCOL.md (v6.2, 'core: iteration is
+> conflict-triggered, not looseness-triggered') and moved verbatim to learnings/promoted.md.
