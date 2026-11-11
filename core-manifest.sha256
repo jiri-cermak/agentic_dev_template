@@ -1,0 +1,12 @@
+# core-manifest.sha256 — pins the five core files of the Tiered Relay Architecture upstream.
+#
+# Regenerate with:  sha256sum CORE_PROTOCOL.md SOUL.md .agents.md bootstrap.sh _relay_context_template.md
+#
+# Must be regenerated whenever any core file changes. Bootstrapped and consumer projects
+# verify their copy of a core file against this manifest to confirm they match the upstream
+# tag (e.g. v6.2) they are pinned to.
+7d952f0e63bcb7713c8568b8602ae75b0785eb3119d63a93fffb7489116f0c9c  CORE_PROTOCOL.md
+f541b6c706f90674fdb12256afdce71e61aaee0b3ed52ba441b0b3ccb9fd02ef  SOUL.md
+7a5f46f612b1c661d831f1566e1973375649f3c37428c3bdac339d9653a364a8  .agents.md
+1b9a032015fb70b5a5008625c3ce70d983ac052308cc02c5f9c0c68e27234828  bootstrap.sh
+b32917d0bdcd4479aba039f7b5bd7ed1f3b1b060a2c733f463a01bdd7a9f18e2  _relay_context_template.md

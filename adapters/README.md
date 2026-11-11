@@ -22,6 +22,7 @@ Every `adapters/<name>/` should provide:
 ## Available adapters
 
 - `dsh/` — DeepSeek Harness adapter
+- `hermes/` — Hermes Agent overlay adapter (re-homed from the retired standalone `hermes_agentic_template` repo)
 
 ## How to use
 
@@ -29,7 +30,7 @@ Every `adapters/<name>/` should provide:
 ./bootstrap.sh /path/to/project --adapter <name>
 ```
 
-This copies `adapters/<name>/` into the project's `.dsh-shims/<name>/` and
+This copies `adapters/<name>/` into the project's `.adapter-shims/<name>/` and
 excludes it from git. The core scaffold remains unchanged.
 
 ## Proposing a new adapter

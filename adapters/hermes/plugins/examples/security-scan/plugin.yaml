@@ -1,0 +1,36 @@
+name: security-scan
+version: 1.0.0
+type: verification_strategy
+description: Comprehensive security scanning for code and dependencies
+author: Hermes Team
+license: MIT
+
+dependencies:
+  - name: hermes-core
+    version: ">=1.0.0"
+
+capabilities:
+  - name: security-scan
+    description: Scan code and dependencies for security vulnerabilities
+    input: project directory
+    output: security report with vulnerabilities and remediation steps
+
+config:
+  scan_dependencies: true
+  scan_code: true
+  scan_configuration: true
+  severity_threshold: medium
+  ignore_dev_dependencies: false
+  output_format: markdown
+
+metadata:
+  category: security
+  tags:
+    - vulnerability
+    - dependency
+    - code-analysis
+  tools_required:
+    - pip-audit (for Python)
+    - npm-audit (for Node.js)
+    - bandit (for Python code)
+    - eslint-security (for JavaScript)

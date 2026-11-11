@@ -1,4 +1,4 @@
-# Tiered Relay Architecture v6.1 — Bootstrap Template
+# Tiered Relay Architecture v6.2 — Bootstrap Template
 
 A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 
@@ -7,9 +7,9 @@ A project-agnostic scaffold for the Architect → Subagent → Verify workflow.
 | File | Purpose |
 |---|---|
 | `SOUL.md` | Model-neutral Architect identity, boundaries, and invariant principles |
-| `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules (v6.1) |
+| `CORE_PROTOCOL.md` | Stable, project-agnostic orchestration rules (v6.2) |
 | `.agents.md` | Project adapter: local root, stack, tools, tests, and protected files |
-| `_relay_context_template.md` | Subagent delegation context template (v6.1) |
+| `_relay_context_template.md` | Subagent delegation context template (v6.2) |
 | `bootstrap.sh` | Creates the scaffold in a new project |
 | `review_by_sol_2026-08-09.md` | Design review and rationale for v6 |
 | `adapters/` | Optional harness-specific shims |
@@ -79,12 +79,24 @@ v6.1 operationalizes the orchestration core with battle-tested procedures:
 
 v4 used JSON relay payloads. v5 introduced direct Markdown context. v6 made the template genuinely project-agnostic. v6.1 adds operational procedures.
 
+## v6.2 changes
+
+v6.2 makes the template the one canonical upstream that every org project (kubera, nuad, t_unity, jong, …) can pin to, and re-homes the Hermes overlay into it:
+
+- **Agnosticism gate restored.** `CORE_PROTOCOL.md` §Skill creation prohibition now forbids restating loop rules in any harness's skill system, stated harness-agnostically (no product/tool/CLI names), so the template's own `agnosticism.yml` gate passes.
+- **Six template-only sections retained.** `Execution record schema`, `Architect pre-flight verification`, `Impeccable design gates (UI relays)`, `Plan-level retry governance`, `Retry context schema`, and `Skill creation prohibition` are unchanged and intact.
+- **Transcript-integrity merge (additive).** The production lineage's transcript-integrity block and the "Raw test output means the filtered signal, verbatim, plus an artifact reference" definition are folded into the core from the `9100dc10` lineage (kubera = nuad = t_unity), so the template is a superset of every consumer core.
+- **Adapter-practice promotion.** The skeleton `.agents.md` now ships the family's proven practices: local test-output hygiene (artifact path + `sha256` + filtered signal verbatim), local execution profile by tier (tier → reasoning effort, set before dispatch), local delegation timing & tier recording (fs-derived `relay.md`→`completion.md` mtime, never self-reported), and the runtime-state `.git/info/exclude` pattern list.
+- **Hermes overlay re-homed as `adapters/hermes/`.** The standalone `hermes_agentic_template` overlay repo is retired and its content lives here as a first-class adapter.
+- **Core manifest.** `core-manifest.sha256` pins the five core files so bootstrapped/consumer projects can verify they match the upstream tag being pinned against.
+
 ## Harness adapters
 
 `adapters/` contains OPTIONAL harness-specific shims — e.g., `adapters/dsh/` for the DeepSeek Harness. The template core is harness-agnostic and never references them. Install one per project with `./bootstrap.sh <path> --adapter <name>`. Deleting `adapters/` changes nothing.
 
 Available adapters:
 - `dsh/` — DeepSeek Harness adapter (see `adapters/dsh/README.md`)
+- `hermes/` — Hermes Agent overlay adapter (see `adapters/hermes/README.md`); re-homed from the retired `hermes_agentic_template` overlay repo
 
 ## Anti-hallucination measures
 

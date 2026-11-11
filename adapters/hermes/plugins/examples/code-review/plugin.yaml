@@ -1,0 +1,43 @@
+name: code-review
+version: 1.0.0
+type: skill
+description: Review code for best practices, security, and performance
+author: Hermes Team
+license: MIT
+
+# Dependencies on other plugins
+dependencies:
+  - name: hermes-core
+    version: ">=1.0.0"
+
+# Plugin capabilities
+capabilities:
+  - name: code-review
+    description: Comprehensive code review with security and performance checks
+    input: source code files
+    output: review report with issues and recommendations
+
+# Configuration options
+config:
+  strict_mode: false
+  check_security: true
+  check_performance: true
+  check_style: true
+  output_format: markdown
+  severity_levels:
+    - critical
+    - warning
+    - info
+
+# Metadata
+metadata:
+  category: development
+  tags:
+    - code-quality
+    - security
+    - performance
+  examples:
+    - description: Review a Python file
+      input: "review src/main.py"
+    - description: Review with strict mode
+      input: "review --strict src/main.py"

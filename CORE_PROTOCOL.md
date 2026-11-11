@@ -173,6 +173,13 @@ Every relay must declare `success_criteria:` as machine-checkable items that a d
 
 The gate passes only when **all** declared checks pass. The Architect reads the report and the check results, not raw output. Where a check is machine-evaluable, no second judgment is applied — the model is removed from that verification path.
 
+**Transcript integrity (whenever the suite runs).** The transcript is a *product* of the run, so it cannot be a pre-declared `success_criteria` check — the hash does not exist when the relay is written. Two rules instead:
+
+1. The subagent records the artifact path and its `sha256` in `## Raw Test Output`; the Architect recomputes `sha256sum` over that file and requires it to match the stated value. A mismatch → **FAIL** (fabricated hash or post-hoc edit).
+2. Cross-run comparison is **semantic**, not by hash: compare test count, `OK`/`FAILED` status, and the set of failing test IDs against your own re-run. A transcript embeds timing, so two honest runs of the same green suite hash differently — a cross-run hash mismatch is expected and must not be treated as a failure.
+
+This still removes the full transcript from the Architect's context: the integrity check is one `sha256sum` call, and the comparison is a few lines of signal — see the `## Raw Test Output` rule in Handover contract.
+
 **State-aware re-execution.** Before re-running the declared tests, confirm the subagent's commit is the latest (`git log -1`). Then run the exact testing methodology yourself and compare your output to the subagent's claimed output. Any discrepancy → **FAIL** (execution error or fabrication).
 
 ## Git and workspace safety
@@ -195,6 +202,8 @@ The completion report must contain these exact sections:
 5. `## Contract Enforcement`
 
 Raw test output must be complete, not summarized. Git evidence must include the current commit and a diff stat. The files table must match the actual commit. Any surprise must be disclosed.
+
+Raw test output means the **filtered signal, verbatim, plus an artifact reference**: the complete failure/error blocks and the final summary line, the artifact path, and its `sha256`. "Raw" never means the raw stream — third-party INFO chatter is not evidence, and pasting it costs output tokens on the way out and input tokens on every read back. The artifact file is the unabridged record; the handover references it. A failure must never be summarized.
 
 **Files Changed table** carries, per file: Path, Action, Size (bytes), and First Line — alongside the machine-verifiable `checksum` in `success_criteria:`. The `checksum` is the gate; Size and First Line are a secondary sanity probe: for every file in the table, the Architect independently runs `wc -c <file>` and `head -1 <file>`, and any mismatch → **FAIL** (contract failure or fabrication).
 
@@ -327,7 +336,7 @@ Subagents log every observation to `learnings/pending.md` as a single atomic app
 
 ## Skill creation prohibition
 
-Do NOT create new Hermes skills via `skill_manage` that restate loop rules already defined in this protocol or the adapter. Skill proposals go to `learnings/pending.md` with a `core` classification; the Architect promotes them through the standard learning lifecycle.
+Do NOT create new skills, in any harness's skill-authoring system, that restate loop rules already defined in this protocol or the adapter; the protocol is the single source of truth for orchestration rules. Skill proposals go to `learnings/pending.md` with a `core` classification; the Architect promotes them through the standard learning lifecycle.
 
 ## Step post-mortem and iteration
 
