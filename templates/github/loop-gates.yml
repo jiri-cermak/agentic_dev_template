@@ -1,0 +1,38 @@
+# Loop-gate DETECTOR for a bootstrapped project (not the blocking gate).
+# With branch protection unavailable on the Free plan, a push can't be refused
+# server-side; the blocking gate is the local pre-push hook
+# (templates/hooks/pre-push). This workflow surfaces drift to the repo on
+# push/PR and weekly, even when a foreign clone missed the hook. Private-repo
+# runners are minutes-cheap (~1s/step); steps whose script is absent skip.
+
+name: Loop gates (drift detector)
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  loop-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Core drift / freeze manifest
+        run: |
+          [ -f ops/loop_check.sh ] || { echo "SKIP loop_check: not present"; exit 0; }
+          bash ops/loop_check.sh
+
+      - name: State budgets / probes
+        run: |
+          [ -f ops/state_check.sh ] || { echo "SKIP state_check: not present"; exit 0; }
+          bash ops/state_check.sh
+
+      - name: History-index integrity
+        run: |
+          [ -f ops/index_check.sh ] || { echo "SKIP index_check: not present"; exit 0; }
+          bash ops/index_check.sh

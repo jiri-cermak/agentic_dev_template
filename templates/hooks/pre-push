@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# Blocking pre-push gate for a bootstrapped project. Runs the same loop/state/
+# index checks as the CI detector (templates/github/loop-gates.yml) and REFUSES
+# the push on any failure.
+#
+# Install (once per clone — hooks do NOT transfer with a clone):
+#   mkdir -p .githooks && cp <this> .githooks/pre-push \
+#     && chmod +x .githooks/pre-push && git config core.hooksPath .githooks
+#
+# core.hooksPath must be set on every clone that pushes. This container is where
+# every push originates, so it is set here during bootstrapping; a foreign clone
+# that forgets it loses the blocking gate and relies on the CI detector only.
+#
+# Safe when a script is absent (skips it), never mutates the tree, and is fast
+# (a sub-second shell run per check).
+
+set -u   # do not run on unset vars; we tally failures ourselves (no -e)
+
+REPO_ROOT="$(git rev-parse --show-toplevel)" \
+  || { echo "PRE-PUSH: not in a git worktree; aborting."; exit 2; }
+
+gates="loop_check.sh state_check.sh index_check.sh"
+failures=0
+
+for gate in $gates; do
+  script="$REPO_ROOT/ops/$gate"
+  if [ ! -f "$script" ]; then
+    echo "PRE-PUSH: SKIP $gate (ops/$gate not present)"
+    continue
+  fi
+  if bash "$script"; then
+    echo "PRE-PUSH: PASS $gate"
+  else
+    echo "PRE-PUSH: FAIL $gate"
+    failures=$((failures + 1))
+  fi
+done
+
+if [ "$failures" -gt 0 ]; then
+  echo "PRE-PUSH: BLOCKED — $failures gate(s) failed; push REFUSED."
+  exit 1
+fi
+
+echo "PRE-PUSH: ALL GATES PASS — push allowed."
+exit 0
