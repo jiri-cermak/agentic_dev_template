@@ -66,7 +66,6 @@ and t_unity. Fire the item when either value has ~doubled since the figures abov
 its freeze tag or unpins upstream, this note's section 2 (and any figures in it,
 e.g. the log sizes above) _may_ go stale. Re-verify section 2 against the repos
 before trusting it, and update this file rather than leaving drift.
-@architect: this prose is the canonical current state of the workstream.
 This note itself is documentation (like `templates/`), so it never needs a new
 upstream tag by itself — a tag is required only when canonizing it changes a
 project's adopted core.
@@ -157,9 +156,14 @@ bash ops/loop_check.sh    # core drift vs the project's upstream pin + its freez
 bash ops/state_check.sh   # state-file budgets/probes (caps + hard limits)
 bash ops/index_check.sh   # CONTEXT_HISTORY.md index integrity
 git config core.hooksPath # must print .githooks
-# CI detector (GitHub API), green bool:
-curl -s "https://api.github.com/repos/jiri-cermak/<name>/actions/workflows/loop-gates.yml/runs?per_page=1" \
-  | grep -o '"conclusion":"success"'
+# CI detector (GitHub API), green bool. Both repos are PRIVATE, so the call must
+# authenticate (via the org token in /opt/data/.env — NOT committed to the repo),
+# and must FAIL LOUDLY if it cannot read the runs instead of silently 403ing.
+set -a; . /opt/data/.env; set +a   # exports GITHUB_TOKEN from the local env file
+runs=$(curl -sf -H "Authorization: token $GITHUB_TOKEN" \
+  "https://api.github.com/repos/jiri-cermak/<name>/actions/workflows/loop-gates.yml/runs?per_page=1")
+[ -z "$runs" ] && { echo "ERROR: could not read CI runs (auth or network)" >&2; exit 1; }
+echo "$runs" | grep -o '"conclusion":"success"'
 ```
 
 **Legacy projects:** no gates — the whole check is reading `CONTEXT_RESTART.md`
