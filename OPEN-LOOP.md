@@ -105,6 +105,14 @@ These are ideas with shape but no owner decision. Do not start them early.
   originate in this container, which is why the hook is effective. The open
   question is the price: upgrade to Pro or open the repos — owner decision, not
   architect's.
+- **Name the pruning destination in `CORE_PROTOCOL.md`.** §Learning lifecycle says `pending.md` items older
+  than 30 days "are archived" but never says where. The first prune (2026-11-11, jong) used
+  `learnings/archive/pending-<date>.md` — a de-facto convention, not canon. Decide and amend the core; it
+  rides an upstream bump.
+- **A promotion sweep before the next prune.** Pruning archives never-promoted items, so unmined `[core]`
+  observations become invisible to the promotion pass (jong's archive holds a large backlog; t_unity keeps
+  per-file learnings and has no `pending.md`, so it is unaffected). Decide whether to promote the ≥2-occurrence
+  core items first, or accept the archive as their permanent home.
 
 ## 6. Invariants worth preserving
 
