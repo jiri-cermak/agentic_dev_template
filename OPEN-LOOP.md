@@ -25,8 +25,8 @@ file is upstream-wide, not project-wide.
 | Participant | Layout | Pinned to | Status |
 |---|---|---|---|
 | **Upstream** (`agentic_dev_template`) | full template | self — `core-manifest.sha256` pins the 5 core files at each tag | tag **v6.2.2** `fc89f7a`; agnosticism gate green; tree clean |
-| **jong** (`/opt/data/projects/jong`) | split | upstream **v6.2** (`60ff79f`), 4 adopted files pinned verbatim | **v6.3**, tag `loop-v6.3-jong-freeze-20261111`; gates `ops/loop_check.sh`, `ops/state_check.sh`, `ops/index_check.sh`; `.githooks/pre-push` + `core.hooksPath`; CI `loop-gates` green |
-| **t_unity** (`/opt/data/projects/t_unity`) | split | upstream **v6.2** (`60ff79f`), 3 adopted files pinned verbatim | **v6.2.7**, tag `loop-v6.2.7-t-unity` (local — not pushed); same three gates; `.githooks/pre-push` + `core.hooksPath`; CI green |
+| **jong** (`/opt/data/projects/jong`) | split | upstream **v6.2.2** (`fc89f7a`), 4 adopted files pinned verbatim | **v6.4**, tag `loop-v6.4-jong-freeze-20261116` on `master` (the `ui-component-pass` branch still carries v6.3 until it merges); gates `ops/loop_check.sh`, `ops/state_check.sh`, `ops/index_check.sh`; `.githooks/pre-push` + `core.hooksPath`; CI `loop-gates` green |
+| **t_unity** (`/opt/data/projects/t_unity`) | split | upstream **v6.2.2** (`fc89f7a`), 3 adopted files pinned verbatim | **v6.2.8**, tag `loop-v6.2.8-t-unity`; same three gates; `.githooks/pre-push` + `core.hooksPath`; CI green |
 | **Legacy set** (kubera, nuad, …) | legacy | none — no pin, no `ops/state_check.sh`, no gates | single `CONTEXT_RESTART.md`, dated log below the marker |
 
 Upstream core = `CORE_PROTOCOL.md`, `SOUL.md`, `.agents.md`, `bootstrap.sh`,
