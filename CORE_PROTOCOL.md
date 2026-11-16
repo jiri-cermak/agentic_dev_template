@@ -1,4 +1,4 @@
-# Tiered Relay Architecture v6.1 — Core Protocol
+# Tiered Relay Architecture v6.2.2 — Core Protocol
 
 This document defines the project-agnostic orchestration loop. It does not define a project's stack, tools, domain, or deployment environment. Those belong in the project adapter (`.agents.md` and the relay context template).
 
@@ -12,7 +12,7 @@ This document defines the project-agnostic orchestration loop. It does not defin
 
 ## Loop
 
-1. **Plan** — classify the requirement tier, create/update `.internal_master_plan.md`, and stash state files.
+1. **Plan** — start from the previous close record (see Plan from the close record), classify the requirement tier, create/update `.internal_master_plan.md`, and stash state files.
 2. **Pre-flight** — verify repository root, clean/known working tree, target paths, and adapter readiness.
 3. **Relay** — construct a self-contained Markdown context with absolute paths, scope, constraints, tests, stop conditions, and handover contract.
 4. **Delegate** — dispatch the relay context directly. Handle errors. Wait for completion. Do not use JSON relay payload files.
@@ -21,6 +21,16 @@ This document defines the project-agnostic orchestration loop. It does not defin
 7. **Gate** — pass, retry with a classified correction, or stop/escalate.
 8. **Post-mortem** — record evidence, classify learnings, and iterate if needed.
 9. **Stabilize** — confirm the workspace is clean and the master plan is consistent before unlocking the next step.
+
+## Plan from the close record
+
+A session's plan starts from the previous **close record** — the dated close entry in the project's handoff or state file, the gate artifact it cites, and that artifact's `sha256` — not from a fresh audit of the block. Trust the record when all three hold:
+
+- `HEAD` equals the close commit the record names;
+- the tree is clean (`git status --porcelain` empty, or only the untracked files the record lists);
+- the record names its gate artifact and `sha256`, and the artifact is present with that hash.
+
+Then re-derive only the claims the record does not cover, or that `HEAD` and the tree contradict, and record the discrepancy beside the plan rather than in place of it. Re-auditing a record that already satisfies the three conditions is repetition, not verification: it spends the session's budget re-proving a closed block and manufactures drift where none existed. When a condition fails, the record is stale — re-derive the failing claims before planning on them.
 
 ## Requirement tiers
 
@@ -207,6 +217,8 @@ Raw test output means the **filtered signal, verbatim, plus an artifact referenc
 
 **Files Changed table** carries, per file: Path, Action, Size (bytes), and First Line — alongside the machine-verifiable `checksum` in `success_criteria:`. The `checksum` is the gate; Size and First Line are a secondary sanity probe: for every file in the table, the Architect independently runs `wc -c <file>` and `head -1 <file>`, and any mismatch → **FAIL** (contract failure or fabrication).
 
+**Close record.** The handover that closes a block states its close commit, the tree state at close, the gate artifact path, and that artifact's `sha256`. Without these the next session cannot trust the record and re-audits what this one already proved.
+
 ## Architect pre-flight verification
 
 The subagent writes `handovers/{TASK_ID}/pre-flight.md` before making any edit. The Architect verifies this record during the handover gate. The record must contain:
@@ -234,6 +246,18 @@ Apply the first matching rule (precedence order):
 | 8 (lowest) | Validation cleared | Independent evidence matches scope and contract | Mark complete and unlock the next step. |
 
 Maximum: `max_attempts` attempts per task ID (default 3). A repeated error signature is a hard stop, not an invitation to consume the remaining budget. Exhausting all attempts is never silent — see Failure escalation.
+
+## The gate is the instrument
+
+These four rules keep the gate honest after a block is committed: the instrument is what gets repaired, and the block is what gets trusted.
+
+**The gate is the only tally.** A brief, a relay context, or a status report cites the gate artifact and its `sha256`; it never restates a pass count. A count copied into prose is a copy, and copies drift from their source. When prose and artifact disagree, the disagreement itself costs a stop — it must be resolved before the next step can be trusted, and resolving it proves nothing about the block.
+
+**A boundary is pinned to the landing commit.** A gate that checks scope over `PRE_SHA..HEAD` — the pre-block commit it pinned, through the current `HEAD` — expires when the block closes, because later commits move `HEAD` past the pinned range. Re-pin the range to the landing commit recorded in the close record before judging. A single red after the close, on an otherwise clean tree, is evidence about the instrument — what it pins, what it compares, what it excludes — not about the landed block.
+
+**Instrument repair is not re-dispatch.** When a stop is caused by the Architect's own gate, relay context, or brief, repair the instrument and prove the repair both ways: re-run it against a known-good artifact (must pass) and a known-bad one (must fail). Re-derive the tally with the fixed instrument, and land the child's committed bytes unchanged — the repair is to the instrument and the record, never to the code. Do not dispatch a relay to redo work the record already shows committed.
+
+**A landed STOP is recorded as landed.** If the Architect lands a stopped relay itself, rewrite the task's completion handover (`handovers/{TASK_ID}/completion.md`) as LANDED with the commit and the gate `sha256`, and retire `failure_postmortem.md`. A handover may not hold both a passing gate artifact (`gate_final.txt`) and a PARTIAL completion: the next session reads the pair as a contradiction and stops on it, which costs more than the record it was meant to protect.
 
 ## Retry context schema
 
@@ -406,6 +430,6 @@ Add measures only when you hit the corresponding failure. Do not front-load all 
 
 ## Compatibility
 
-v4 was the JSON relay protocol. v5 introduced direct Markdown delegation context and the first environment-specific tool mandate. v6 keeps direct context, makes the core project-agnostic, and moves environment/project details into adapters. v6.1 adds operational procedures: requirement tiers with a decision tree, pre-delegation stash, error handling, clean-state checks, master plan template, iteration patterns, and ROI rankings.
+v4 was the JSON relay protocol. v5 introduced direct Markdown delegation context and the first environment-specific tool mandate. v6 keeps direct context, makes the core project-agnostic, and moves environment/project details into adapters. v6.1 adds operational procedures: requirement tiers with a decision tree, pre-delegation stash, error handling, clean-state checks, master plan template, iteration patterns, and ROI rankings. v6.2.2 adds close-record planning and the gate-authority rules: one tally, boundary pinning to the landing commit, instrument repair instead of re-dispatch, and a landed STOP recorded as landed.
 
 The core is authoritative for orchestration. The adapter is authoritative for local paths, tools, dependencies, tests, protected files, and domain conventions.

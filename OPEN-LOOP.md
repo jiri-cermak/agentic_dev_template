@@ -1,6 +1,6 @@
 # OPEN-LOOP — Agentic-loop workstream resume note
 
-> Last verified: **2026-11-11** · Upstream `agentic_dev_template` at tag **v6.2.1** (`5b2a371`).
+> Last verified: **2026-11-16** · Upstream `agentic_dev_template` at tag **v6.2.2**.
 
 ## 1. What this file is
 
@@ -24,9 +24,9 @@ file is upstream-wide, not project-wide.
 
 | Participant | Layout | Pinned to | Status |
 |---|---|---|---|
-| **Upstream** (`agentic_dev_template`) | full template | self — `core-manifest.sha256` pins the 5 core files at each tag | tag **v6.2.1** `5b2a371`; agnosticism gate green; tree clean |
+| **Upstream** (`agentic_dev_template`) | full template | self — `core-manifest.sha256` pins the 5 core files at each tag | tag **v6.2.2**; agnosticism gate green; tree clean |
 | **jong** (`/opt/data/projects/jong`) | split | upstream **v6.2** (`60ff79f`), 4 adopted files pinned verbatim | **v6.3**, tag `loop-v6.3-jong-freeze-20261111`; gates `ops/loop_check.sh`, `ops/state_check.sh`, `ops/index_check.sh`; `.githooks/pre-push` + `core.hooksPath`; CI `loop-gates` green |
-| **t_unity** (`/opt/data/projects/t_unity`) | split | upstream **v6.2** (`60ff79f`), 3 adopted files pinned verbatim | **v6.2.6**, tag `loop-v6.2.6-t-unity`; same three gates; `.githooks/pre-push` + `core.hooksPath`; CI green |
+| **t_unity** (`/opt/data/projects/t_unity`) | split | upstream **v6.2** (`60ff79f`), 3 adopted files pinned verbatim | **v6.2.7**, tag `loop-v6.2.7-t-unity` (local — not pushed); same three gates; `.githooks/pre-push` + `core.hooksPath`; CI green |
 | **Legacy set** (kubera, nuad, …) | legacy | none — no pin, no `ops/state_check.sh`, no gates | single `CONTEXT_RESTART.md`, dated log below the marker |
 
 Upstream core = `CORE_PROTOCOL.md`, `SOUL.md`, `.agents.md`, `bootstrap.sh`,
@@ -35,6 +35,11 @@ exclude `.agents.md` because each keeps its own project adapter (frozen
 separately); t_unity also drops `bootstrap.sh`. The architect-profile
 `session-close` routine detects layout (`CONTEXT_HISTORY.md` + `ops/state_check.sh`
 present → **SPLIT MODE**, else **LEGACY MODE**) and runs the gates accordingly.
+
+**Version scheme:** upstream core bumps stay on **v6.2.x** (v6.2 canonical, v6.2.1
+docs-only, v6.2.2 core) because **v6.3 is kubera's direct-copy freeze**
+(2026-10-16), not an upstream tag — reusing the number would give two different
+file sets one name.
 
 ## 3. Parked items — with triggers
 
@@ -81,10 +86,6 @@ isolation, so the version/reuse pin and the adoption prose stay in lockstep
   and the core pin (`adapters/loop-upstream-v6.2.sha256`). The gate files are in
   already; the prose describing them is not.
 - **t_unity's next bump** — same pair, same timing.
-- **`project-next-block-triage` skill (another Hermes profile)** — still carries
-  legacy-mode wording for the loop handoff; the `session-close` routine detected
-  split mode. Correcting it needs the owner's **explicit word each time** because
-  it is another profile's skill; do not touch it on this task's authority alone.
 
 ## 5. Candidate next work — not yet decided
 
@@ -142,6 +143,16 @@ Hard-won rules, stated with the evidence that produced them.
 - **Hook `core.hooksPath` is per-clone, not per-repo.** It does not transfer with
   a clone, which is precisely why the container re-sets it during bootstrapping
   and why the CI detector matters at all. Never assume a fresh clone is gated.
+- **Process lives in the protocol; skills carry tools.** A skill that decides what
+  to do — triage, gating, next steps — becomes a second source of loop rules and
+  loads in every session matching its trigger. When a skill accumulates
+  instructions rather than commands, fold the process into `CORE_PROTOCOL.md` (or
+  the adapter) and leave the skill a tool. Evidence (2026-11-16):
+  `plan-verification` was loaded in **26 of 27** sessions for the words "next
+  steps" — it had become the de-facto triage skill; deleting its next-steps
+  section (31.1 KB → 28.5 KB) removed the trigger. Three process skills were
+  archived the same day (`project-next-block-triage` 435 patches,
+  `relay-gate-authoring` 31 patches in a day, `documents-of-record` 25).
 
 ## 7. One-command verification of the whole loop
 
@@ -177,3 +188,24 @@ echo "$runs" | grep -o '"conclusion":"success"'
 **Legacy projects:** no gates — the whole check is reading `CONTEXT_RESTART.md`
 (dated log below the marker) and confirming no orphaned references to removed
 state files.
+
+## 8. Skill-watcher tripwires
+
+A daily job (`/root/ops-manual/scripts/hermes-skill-watch.py` in the architect
+profile; runs 05:30 UTC, reported in the 08:05 briefing) produces four signals.
+The first two are context; the last two are **tripwires** — a hit means a skill is
+doing the protocol's job, so fold the process back into core and archive the
+skill.
+
+- **New skills since the baseline** — either the protocol has a gap, or a tool was
+  authored in the wrong place.
+- **Cumulative most-patched** — churn where the rule sits means it is unstable
+  there.
+- **Process candidates** — unpinned skill over **12 KB** with **≥8 patches in 14
+  days**. Size plus churn says it triages or blocks, rather than carrying a tool.
+- **Big and heavily patched** — unpinned skill over **24 KB** with **≥40 patches**:
+  the same diagnosis at a later stage.
+
+Motivating evidence (2026-11-16): the three skills archived that day totalled 491
+patches, and `plan-verification` — loaded in 26 of 27 sessions — is the case these
+tripwires exist to catch.
